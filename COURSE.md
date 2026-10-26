@@ -42,6 +42,9 @@ mcp_practice/
 
 **Проверка:** `uv --version`, `npx --version` и `claude --version` печатают версии.
 
+> Курс использует `uv` для создания проекта, установки зависимостей и запуска сервера. Если `uv` не установлен, поставьте его по инструкции: https://docs.astral.sh/uv/getting-started/installation/
+> Например, на Windows: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`, на macOS и Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`. После установки перезапустите терминал.
+
 ### Шаг 0.2 — Создать проект
 - [ ] В папке `mcp_practice` (где лежит этот файл) инициализировать uv-проект.
 - [ ] Добавить зависимость SDK с CLI-расширением.
