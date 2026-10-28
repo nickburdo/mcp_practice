@@ -197,9 +197,17 @@ mcp_practice/
 ### Шаг 4.3 — Безопасность путей
 - [ ] Запретить чтение за пределами `notes/`.
 
-**Проверка:** вызов в Inspector с `name="../pyproject.toml"` возвращает ошибку, а не содержимое файла.
+**Почему это нужно.** Сейчас `read_note` склеивает путь как `NOTES_DIR / name` и читает любой файл, до которого дотянется. Опасных случаев два:
+- `name="../pyproject.toml"`: `..` выводит из папки `notes/` наверх.
+- `name="C:/Windows/win.ini"` (на macOS и Linux — `name="/etc/hosts"`): если справа от `/` стоит абсолютный путь, `pathlib` отбрасывает всё, что слева, и `NOTES_DIR` просто исчезает.
 
-**Подсказки:** `Path.resolve()`, `Path.is_relative_to()`.
+**Подсказки:**
+1. Приведите путь к окончательному виду: `(NOTES_DIR / name).resolve()`. [`resolve()`](https://docs.python.org/3/library/pathlib.html#pathlib.Path.resolve) делает путь абсолютным и убирает `..`: `notes/../pyproject.toml` превращается в `.../mcp_practice/pyproject.toml`.
+2. Проверьте, что результат лежит внутри папки заметок: [`path.is_relative_to(NOTES_DIR.resolve())`](https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.is_relative_to). Папку тоже приведите через `resolve()`, иначе сравнятся пути разного вида.
+3. Если проверка не прошла, бросьте `ToolError`, как в шаге 4.2.
+4. Эта проверка понадобится ещё в `write_note` (шаг 6.1) и в ресурсе `notes://{name}` (шаг 8.2), поэтому удобно вынести её в отдельную функцию.
+
+**Проверка:** в Inspector оба вызова, `name="../pyproject.toml"` и `name="C:/Windows/win.ini"`, возвращают ошибку, а не содержимое файла. `name="shopping-list.md"` по-прежнему читается.
 
 **Вопрос для понимания 2.** Почему эту проверку нужно делать в сервере, а не надеяться, что модель не попросит лишнего? ([ответ](#ответы-на-вопросы-для-понимания))
 

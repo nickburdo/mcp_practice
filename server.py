@@ -8,6 +8,14 @@ NOTES_DIR = Path(__file__).parent / "notes"
 mcp = MCPServer("Notes")
 
 
+def note_path(name: str) -> Path:
+    """Resolve a note name to a path, refusing anything outside the notes folder."""
+    path = (NOTES_DIR / name).resolve()
+    if not path.is_relative_to(NOTES_DIR.resolve()):
+        raise ToolError(f"Note name '{name}' must not point outside the notes folder.")
+    return path
+
+
 @mcp.tool()
 def list_notes() -> list[str]:
     """List the names of all notes (Markdown files) in the notes folder."""
@@ -17,7 +25,7 @@ def list_notes() -> list[str]:
 @mcp.tool()
 def read_note(name: str) -> str:
     """Read a note (Markdown file) in the notes folder."""
-    path = NOTES_DIR / name
+    path = note_path(name)
     if not path.is_file():
         raise ToolError(f"Note '{name}' not found.")
     return path.read_text(encoding="utf-8")
