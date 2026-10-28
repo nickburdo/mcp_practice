@@ -117,12 +117,17 @@ Stop the process with `Ctrl+C`.
 - [ ] Write a `list_notes` tool that returns a sorted list of file names from the `notes/` folder.
 
 **Hints:**
+- Write the tools right in `server.py`. Importing a function from another file is not enough: it also has to be registered on the server. How to do that is described in the ["Tools in a separate file"](#tools-in-a-separate-file) section at the end of the course.
 - The `@mcp.tool()` decorator (with the parentheses) turns a function into a tool.
-- The `if __name__ == "__main__":` block must stay at the end of the file: `mcp.run()` does not return, and nothing below it will run. Inspector won't reveal this mistake, because `mcp dev` imports the file and skips this block.
+- The server launch (the `if __name__ == "__main__":` block) must stay at the end of the file: `mcp.run()` does not return, and nothing below it will run. Inspector won't reveal this mistake, because `mcp dev` imports the file and skips this block.
 - The SDK builds the tool description for the model itself:
   - **name** — from the function name;
   - **description** — from the docstring;
   - **argument schema** — from the type hints.
+- The docstring is the triple-quoted string right below `def`. It is not just a comment: the SDK sends it to the model as the tool description, and the model uses it to decide when to call the tool. Without a docstring, the model sees only the function name and its arguments. For `list_notes`, this would work, for example:
+  ```python
+  """List the names of all notes (Markdown files) in the notes folder."""
+  ```
 - Build the folder path relative to the file's location, not the current directory: `Path(__file__).parent / "notes"`. Claude Code may launch the server from a different working directory.
 - Return type: `list[str]` or `str`. Try both and see in Inspector how the result differs.
 
@@ -311,6 +316,47 @@ Resources are data chosen by the **user**, not the model. Tools are actions chos
 - Streamable HTTP transport: the same server as a network service, and `claude mcp add --transport http`.
 - Structured tool output: returning Pydantic models and TypedDict.
 - Progress for long-running operations: `ctx.report_progress(...)`.
+- Tools in a separate file: details below.
+
+### Tools in a separate file
+
+When there are many tools, it is convenient to move them out of `server.py` into a separate module. A tool is a plain function, but importing it is not enough: it has to be registered on the `mcp` object that actually runs.
+
+**The right way:** the function lives in a separate file, and `server.py` registers it with `mcp.add_tool(...)`. This is the same as `@mcp.tool()`: the decorator calls `add_tool` internally, and the name, description, and argument schema are built the same way.
+
+`tools.py`:
+```python
+from pathlib import Path
+
+NOTES_DIR = Path(__file__).parent / "notes"
+
+
+def list_notes() -> list[str]:
+    """List the names of all notes (Markdown files) in the notes folder."""
+    return sorted(path.name for path in NOTES_DIR.glob("*.md"))
+```
+
+`server.py`:
+```python
+from mcp.server import MCPServer
+
+from tools import list_notes
+
+mcp = MCPServer("Notes")
+mcp.add_tool(list_notes)
+
+if __name__ == "__main__":
+    mcp.run()
+```
+
+`tools.py` has no imports from the MCP SDK: these are plain functions you can call and test separately from the server.
+
+**The trap:** don't import `mcp` from `server.py` into the tools file (`from server import mcp` with `@mcp.tool()` above the function). When run with `uv run server.py`, this breaks silently:
+1. `server.py` is run as a script, so Python loads it under the name `__main__`.
+2. `tools.py` runs `from server import mcp`. Python hasn't loaded a module named `server` yet, so it loads `server.py` a second time and creates a second `mcp` object.
+3. The tools are registered on the second object, while the first one runs. `tools/list` returns an empty list.
+
+Inspector won't show this mistake: `mcp dev` imports the file rather than running it as a script. The rule is simple: the server imports the tools, and the tools don't import the server.
 
 ---
 
