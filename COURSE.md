@@ -114,10 +114,11 @@ Stop the process with `Ctrl+C`.
 ## Module 2. The first tool
 
 ### Step 2.1 — `list_notes`
-- [ ] Write a `list_notes` tool that returns the file names from the `notes/` folder.
+- [ ] Write a `list_notes` tool that returns a sorted list of file names from the `notes/` folder.
 
 **Hints:**
 - The `@mcp.tool()` decorator (with the parentheses) turns a function into a tool.
+- The `if __name__ == "__main__":` block must stay at the end of the file: `mcp.run()` does not return, and nothing below it will run. Inspector won't reveal this mistake, because `mcp dev` imports the file and skips this block.
 - The SDK builds the tool description for the model itself:
   - **name** — from the function name;
   - **description** — from the docstring;
