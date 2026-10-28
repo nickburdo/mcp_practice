@@ -9,8 +9,9 @@ The goal is to write a minimal local "Notes" MCP server in Python with your own 
 SDK version: `mcp` **2.3.0** (PyPI, October 2026).
 > ⚠️ In SDK v2 the `FastMCP` class was renamed to `MCPServer`. Most tutorials on the internet (and the course in `cli_project`) are written for v1: `from mcp.server.fastmcp import FastMCP`. In v2 this import fails with `ModuleNotFoundError`. If an example from the internet doesn't work, check the version first.
 
-SDK documentation: https://py.sdk.modelcontextprotocol.io
-Claude Code MCP documentation: https://code.claude.com/docs/en/mcp
+### Documentation
+- MCP Python SDK: https://py.sdk.modelcontextprotocol.io
+- Claude Code MCP: https://code.claude.com/docs/en/mcp
 
 ---
 
@@ -181,24 +182,32 @@ Stop the process with `Ctrl+C`.
 ### Step 4.1 — `read_note(name)`
 - [ ] The tool takes a note name and returns its text.
 
+**Documentation:** [Tools](https://py.sdk.modelcontextprotocol.io/servers/tools/)
+
 ### Step 4.2 — Expected errors
 - [ ] If the note doesn't exist, return an error the model can understand instead of crashing with a traceback.
 
-**Hints:**
-- `from mcp.server.mcpserver.exceptions import ToolError`
-- `raise ToolError("message")` — the model will receive a response with `is_error=True` and your text, and will be able to react to it.
-- Any other exception is treated as a "crash": the model will only see `Error executing tool <name>`, without details.
+**Documentation:** [Handling errors](https://py.sdk.modelcontextprotocol.io/servers/handling-errors/)
 
 **Experiment:**
-1. Ask Claude to read a nonexistent note and see how it reacts to `ToolError`.
-2. Temporarily replace `ToolError` with a plain `ValueError` and compare.
+1. After editing `server.py`, reconnect the server in Claude Code: `/mcp` → `notes` → Reconnect. There is no need to register the server again.
+2. Ask Claude to read a nonexistent note and see how it reacts to `ToolError`.
+3. Temporarily replace `ToolError` with a plain `ValueError` and compare.
 
 ### Step 4.3 — Path safety
 - [ ] Forbid reading outside of `notes/`.
 
-**Check:** a call in Inspector with `name="../pyproject.toml"` returns an error, not the file contents.
+**Why this is needed.** Right now `read_note` builds the path as `NOTES_DIR / name` and reads any file it can reach. There are two dangerous cases:
+- `name="../pyproject.toml"`: `..` leads out of the `notes/` folder upwards.
+- `name="C:/Windows/win.ini"` (on macOS and Linux, `name="/etc/hosts"`): if the right side of `/` is an absolute path, `pathlib` drops everything on the left, and `NOTES_DIR` simply disappears.
 
-**Hints:** `Path.resolve()`, `Path.is_relative_to()`.
+**Hints:**
+1. Bring the path to its final form: `(NOTES_DIR / name).resolve()`. [`resolve()`](https://docs.python.org/3/library/pathlib.html#pathlib.Path.resolve) makes the path absolute and removes `..`: `notes/../pyproject.toml` becomes `.../mcp_practice/pyproject.toml`.
+2. Check that the result lies inside the notes folder: [`path.is_relative_to(NOTES_DIR.resolve())`](https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.is_relative_to). Resolve the folder too, otherwise you compare paths of different forms.
+3. If the check fails, raise `ToolError`, as in step 4.2.
+4. You will need this check again in `write_note` (step 6.1) and in the `notes://{name}` resource (step 8.2), so it is convenient to move it into a separate function.
+
+**Check:** in Inspector, both calls, `name="../pyproject.toml"` and `name="C:/Windows/win.ini"`, return an error, not the file contents. `name="shopping-list.md"` still reads fine.
 
 **Comprehension question 2.** Why does this check have to be done in the server, rather than hoping the model won't ask for too much? ([answer](#answers-to-comprehension-questions))
 
