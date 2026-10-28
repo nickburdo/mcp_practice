@@ -284,6 +284,7 @@ Read the documentation first: [Resources](https://py.sdk.modelcontextprotocol.io
 **Documentation:** [URI templates](https://py.sdk.modelcontextprotocol.io/servers/uri-templates/)
 
 **Hints:**
+- This uses the simplest form of a template: a single `{name}` parameter. The other template features are described in the ["Resource templates in more detail"](#resource-templates-in-more-detail) section at the end of the course.
 - The function parameter name must match the name in curly braces: `{name}` → `name`.
 - To check the name, use the path protection function you extracted in step 4.3.
 - If the note doesn't exist, raise `ResourceNotFoundError`, not `ToolError`: this is the error for resources ([Handling errors: A resource that doesn't exist](https://py.sdk.modelcontextprotocol.io/servers/handling-errors/#a-resource-that-doesnt-exist)).
@@ -347,6 +348,7 @@ Read the documentation first: [Resources](https://py.sdk.modelcontextprotocol.io
 - Progress for long-running operations: `ctx.report_progress(...)`.
 - Tools in a separate file: details below.
 - Notes in the `@` autocomplete: details below.
+- Resource templates in more detail: details below.
 
 ### Tools in a separate file
 
@@ -413,6 +415,20 @@ The list is built once, when the server starts. A note created later will appear
 - in its `initialize` response, the server declares `"resources":{"listChanged":false}` by default, and the client is entitled to ignore notifications from such a server.
 
 **Documentation:** [Resources](https://py.sdk.modelcontextprotocol.io/servers/resources/), [Subscriptions](https://py.sdk.modelcontextprotocol.io/handlers/subscriptions/)
+
+### Resource templates in more detail
+
+Step 7.2 uses the simplest form of a template — a single `{name}` parameter. The [URI templates](https://py.sdk.modelcontextprotocol.io/servers/uri-templates/) documentation describes the others:
+
+| Form | Example | What it does |
+|---|---|---|
+| `{name}` | `books://{isbn}` | one address segment (our case) |
+| typed parameter | `orders://{order_id}` with `order_id: int` | the SDK converts the value to the function parameter's type |
+| `{+name}` | `manuals://{+path}` | also captures `/`, i.e. a multi-segment path |
+| `{?a,b}` | `reviews://{isbn}{?limit,sort}` | query parameters after `?`, optional |
+| `{/name*}` | `shelves://browse{/path*}` | path segments as a list |
+
+The same page has a security section: which values the SDK rejects on its own (`..`, absolute paths, null bytes), and the `safe_join` function for accessing files. You can compare it with your path protection from step 4.3.
 
 ---
 
