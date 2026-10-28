@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from mcp.server import MCPServer
@@ -6,6 +7,7 @@ from mcp.types import ToolAnnotations
 
 NOTES_DIR = Path(__file__).parent / "notes"
 
+logger = logging.getLogger(__name__)
 mcp = MCPServer("Notes")
 
 
@@ -51,6 +53,7 @@ def write_note(name: str, content: str) -> str:
     """
     path = note_path(name)
     path.write_text(content, encoding="utf-8")
+    logger.info("Saved note '%s'", name)
     return f"Saved note '{name}'."
 
 
