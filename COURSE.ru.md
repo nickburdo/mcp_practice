@@ -73,12 +73,10 @@ mcp_practice/
 ### Шаг 1.1 — Минимальный сервер
 - [ ] Создать `server.py`: экземпляр сервера с именем `"Notes"` и запуск по stdio, когда файл выполняется как скрипт.
 
-**Подсказки:**
-- `from mcp.server import MCPServer`
-- `MCPServer(name: str)` — создаёт сервер.
+**Документация:** [First steps](https://py.sdk.modelcontextprotocol.io/get-started/first-steps/), [Connect to a real host](https://py.sdk.modelcontextprotocol.io/get-started/real-host/)
+
+**Подсказка:**
 - Сохраните экземпляр в переменную уровня модуля с именем `mcp`: `mcp = MCPServer("Notes")`. Дальше в курсе все подсказки используют это имя (`@mcp.tool()`, `@mcp.resource()`, `@mcp.prompt()`), а команды `mcp dev` и `mcp run` ищут в файле объект с именем `mcp`, `server` или `app`.
-- `mcp.run()` — запускает сервер (по умолчанию транспорт stdio).
-- Запуск поместите под `if __name__ == "__main__":`. Инструменты SDK (`mcp dev`, `mcp run`) импортируют ваш файл, и при импорте сервер стартовать не должен.
 
 ### Шаг 1.2 — Эксперимент: побыть клиентом самому
 - [ ] Запустить `uv run server.py` и вставить в терминал три сообщения по очереди, нажимая Enter после каждого. Каждое сообщение — одна строка JSON.
@@ -117,14 +115,11 @@ mcp_practice/
 ### Шаг 2.1 — `list_notes`
 - [ ] Написать инструмент `list_notes`, который возвращает отсортированный список имён файлов из папки `notes/`.
 
+**Документация:** [Tools](https://py.sdk.modelcontextprotocol.io/servers/tools/), [Structured Output](https://py.sdk.modelcontextprotocol.io/servers/structured-output/)
+
 **Подсказки:**
 - Инструменты пишите прямо в `server.py`. Функцию из другого файла недостаточно импортировать: её нужно ещё зарегистрировать на сервере. Как это сделать, описано в разделе [«Инструменты в отдельном файле»](#инструменты-в-отдельном-файле) в конце курса.
-- Декоратор `@mcp.tool()` (именно со скобками) превращает функцию в инструмент.
 - Запуск сервера (блок `if __name__ == "__main__":`) должен оставаться в конце файла: `mcp.run()` не возвращает управление, и всё, что ниже, не выполнится. В Inspector такая ошибка незаметна, потому что `mcp dev` импортирует файл и этот блок не выполняет.
-- SDK сам строит описание инструмента для модели:
-  - **имя** — из имени функции;
-  - **описание** — из docstring;
-  - **схема аргументов** — из type hints.
 - Docstring — строка в тройных кавычках сразу под `def`. Это не просто комментарий: SDK отправляет её модели как описание инструмента, и по нему модель решает, когда инструмент вызывать. Без docstring модель видит только имя функции и её аргументы. Для `list_notes` подойдёт, например:
   ```python
   """List the names of all notes (Markdown files) in the notes folder."""
@@ -135,6 +130,8 @@ mcp_practice/
 ### Шаг 2.2 — Проверка в MCP Inspector
 - [ ] Запустить `uv run mcp dev server.py`.
 - [ ] В открывшемся браузере нажать Connect → вкладка **Tools** → `list_notes` → Run.
+
+**Документация:** [First steps](https://py.sdk.modelcontextprotocol.io/get-started/first-steps/) (раздел про `mcp dev`)
 
 **Проверка:** видите список своих файлов.
 
@@ -149,6 +146,8 @@ mcp_practice/
   ```bash
   claude mcp add notes -- uv run --directory C:/path/to/mcp_practice server.py
   ```
+
+**Документация:** [Claude Code: MCP](https://code.claude.com/docs/en/mcp), [Connect to a real host](https://py.sdk.modelcontextprotocol.io/get-started/real-host/)
 
 **Пояснения:**
 - `notes` — имя, под которым Claude Code будет знать сервер.
