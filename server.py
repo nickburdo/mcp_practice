@@ -1,8 +1,9 @@
 import logging
+from encodings import utf_8
 from pathlib import Path
 
 from mcp.server import MCPServer
-from mcp.server.mcpserver.exceptions import ToolError
+from mcp.server.mcpserver.exceptions import ToolError, ResourceNotFoundError
 from mcp.types import ToolAnnotations
 
 NOTES_DIR = Path(__file__).parent / "notes"
@@ -55,6 +56,26 @@ def write_note(name: str, content: str) -> str:
     path.write_text(content, encoding="utf-8")
     logger.info("Saved note '%s'", name)
     return f"Saved note '{name}'."
+
+
+@mcp.resource("notes://index")
+def notes_index() -> str:
+    """All notes in the notes folder with the first line of each."""
+    lines = []
+    for name in list_notes():
+        text = (NOTES_DIR / name).read_text(encoding="utf-8")
+        first_line = (text.splitlines() or [""])[0]
+        lines.append(f"{name}: {first_line}")
+    return "\n".join(lines)
+
+
+@mcp.resource("notes://{name}")
+def note_content(name: str) -> str:
+    """The full text of one note, for example notes://shopping-list.md."""
+    try:
+        return read_note(name)
+    except ToolError as e:
+        raise ResourceNotFoundError(str(e)) from e
 
 
 if __name__ == "__main__":

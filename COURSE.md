@@ -273,23 +273,28 @@ Each annotation takes only `True` or `False`.
 
 ## Module 7. Resources
 
-Resources are data chosen by the **user**, not the model. Tools are actions chosen by the model.
+Read the documentation first: [Resources](https://py.sdk.modelcontextprotocol.io/servers/resources/).
 
 ### Step 7.1 — Static resource `notes://index`
-- [ ] The resource returns a list of notes with their size or first line.
-
-**Hints:**
-- `@mcp.resource("notes://index")` — a URI without parameters means a static resource, and the function must have no parameters.
-- The returned `str` becomes the text content of the resource. Optional decorator arguments: `name`, `description`, `mime_type`.
+- [ ] Add a function with the `@mcp.resource("notes://index")` decorator to `server.py`. The function takes no parameters and returns a string: the list of notes with the size or first line of each.
 
 ### Step 7.2 — Resource template `notes://{name}`
-- [ ] The resource returns the contents of a specific note.
+- [ ] Add a function with the `@mcp.resource("notes://{name}")` decorator to `server.py`. The function takes a `name` parameter and returns the note's text.
 
-**Hints:** `{name}` in the URI must match the function parameter **exactly**. Don't forget the path protection.
+**Documentation:** [URI templates](https://py.sdk.modelcontextprotocol.io/servers/uri-templates/)
+
+**Hints:**
+- The function parameter name must match the name in curly braces: `{name}` → `name`.
+- To check the name, use the path protection function you extracted in step 4.3.
+- If the note doesn't exist, raise `ResourceNotFoundError`, not `ToolError`: this is the error for resources ([Handling errors: A resource that doesn't exist](https://py.sdk.modelcontextprotocol.io/servers/handling-errors/#a-resource-that-doesnt-exist)).
 
 ### Step 7.3 — Check
 - [ ] In Inspector: the Resources and Resource Templates tabs.
+> **The `@` limitation in Claude Code.** The `@` autocomplete contains only static resources, so you can't attach a template resource with `@`. This is a limitation of the `@` feature of a specific client, not of the protocol: other clients, such as Inspector, work with templates. There are two ways around it:
+> - either ask Claude to read the resource by its address, as in the check below;
+> - or register each note on the server as a separate resource. This is beyond the scope of the course; see the ["Notes in the `@` autocomplete"](#notes-in-the--autocomplete) section at the end of the course.
 - [ ] In Claude Code: type `@` in the input line and find the resources of the `notes` server. Attach `notes://index` to a question.
+- [ ] In Claude Code: ask "Read the MCP resource notes://shopping-list.md from the notes server".
 
 **Comprehension question 4.** Which resources appear in the `@` autocomplete: static, templated, or both? ([answer](#answers-to-comprehension-questions))
 
@@ -341,6 +346,7 @@ Resources are data chosen by the **user**, not the model. Tools are actions chos
 - Structured tool output: returning Pydantic models and TypedDict.
 - Progress for long-running operations: `ctx.report_progress(...)`.
 - Tools in a separate file: details below.
+- Notes in the `@` autocomplete: details below.
 
 ### Tools in a separate file
 
@@ -382,6 +388,32 @@ if __name__ == "__main__":
 
 Inspector won't show this mistake: `mcp dev` imports the file rather than running it as a script. The rule is simple: the server imports the tools, and the tools don't import the server.
 
+### Notes in the `@` autocomplete
+
+The `@` autocomplete in Claude Code shows only resources from `resources/list`, and the `notes://{name}` template doesn't get there. To make notes attachable with `@`, register each one as a separate resource. The SDK has a ready-made `FileResource` class for files:
+
+```python
+from mcp.server.mcpserver.resources import FileResource
+
+for path in sorted(NOTES_DIR.glob("*.md")):
+    mcp.add_resource(
+        FileResource(
+            uri=f"notes://{path.name}",
+            name=path.name,
+            path=path.resolve(),
+            mime_type="text/markdown",
+        )
+    )
+```
+
+The list is built once, when the server starts. A note created later will appear in `@` after you reconnect the server (`/mcp` → `notes` → Reconnect).
+
+**Without reconnecting.** The server can tell the client that the resource list has changed with a `notifications/resources/list_changed` notification. When Claude Code receives it, it requests the list again. For this, after creating a note in `write_note`, register the new resource and send the notification. Two caveats:
+- the way to send it depends on the protocol version: `ctx.notify_resources_changed()` works on the 2026-07-28 protocol, while older ones need `ctx.session.send_resource_list_changed()`;
+- in its `initialize` response, the server declares `"resources":{"listChanged":false}` by default, and the client is entitled to ignore notifications from such a server.
+
+**Documentation:** [Resources](https://py.sdk.modelcontextprotocol.io/servers/resources/), [Subscriptions](https://py.sdk.modelcontextprotocol.io/handlers/subscriptions/)
+
 ---
 
 ## Answers to comprehension questions
@@ -398,7 +430,7 @@ The model is not a security boundary. It can make mistakes, and it can be tricke
 A mistake while reading can simply be ignored, but a mistake while writing cannot: an overwritten note can't be brought back. The model may misunderstand the request or follow someone else's instruction found in the data it has read. The permission request keeps a human as the last step before an irreversible action. The `readOnlyHint` and `destructiveHint` annotations help the host decide where asking is a must.
 
 **4. Which resources appear in the `@` autocomplete?**
-Expected: only static ones, such as `notes://index`. The server returns them in response to `resources/list`: these are concrete resources with a ready URI. The `notes://{name}` template comes in a separate `resources/templates/list` request and is not a resource by itself until a name is filled in. You can attach a note through the template by typing a concrete URI, for example `@notes:notes://shopping`. Check this on your version of Claude Code: the documentation does not say whether the autocomplete shows templates.
+Only static ones, such as `notes://index`. The server returns them in response to `resources/list`: these are concrete resources with a ready address. The `notes://{name}` template comes in a separate `resources/templates/list` request as an address pattern, not as a list of notes, so it is not in `@`, and you can't attach a note through `@`. But the template still works in Claude Code: if you ask Claude to read `notes://shopping-list.md`, the model reads the resource itself, through Claude Code's built-in tools for reading resources.
 
 **5. How does an attached resource differ from a `list_notes` call?**
 - **Who decides.** You chose the resource; the model chose to call the tool.
