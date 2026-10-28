@@ -75,15 +75,39 @@ By the end of the course the server will support:
 **Hints:**
 - `from mcp.server import MCPServer`
 - `MCPServer(name: str)` — creates the server.
+- Store the instance in a module-level variable named `mcp`: `mcp = MCPServer("Notes")`. All later hints in the course use this name (`@mcp.tool()`, `@mcp.resource()`, `@mcp.prompt()`), and the `mcp dev` and `mcp run` commands look for an object named `mcp`, `server`, or `app` in the file.
 - `mcp.run()` — runs the server (stdio transport by default).
 - Put the launch under `if __name__ == "__main__":`. The SDK tools (`mcp dev`, `mcp run`) import your file, and the server must not start on import.
 
-### Step 1.2 — Observation: what stdio looks like
-- [ ] Run `uv run server.py` manually.
+### Step 1.2 — Experiment: be the client yourself
+- [ ] Run `uv run server.py` and paste the three messages below into the terminal one at a time, pressing Enter after each. Each message is a single line of JSON.
 
-**What you'll see:** nothing happens, the process "hangs". The server is waiting for JSON-RPC messages on stdin, meaning a client has to launch it and "feed" it. Stop the process with `Ctrl+C`.
+1. `initialize`:
+   ```json
+   {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"manual","version":"0.1"}}}
+   ```
+2. `notifications/initialized`:
+   ```json
+   {"jsonrpc":"2.0","method":"notifications/initialized"}
+   ```
+3. `tools/list`:
+   ```json
+   {"jsonrpc":"2.0","id":2,"method":"tools/list"}
+   ```
 
-**Comprehension question:** why is it pointless to keep such a server running in a separate terminal and expect Claude Code to connect to it?
+**What you'll see:**
+- After `initialize`, the server answers with a line that contains `"serverInfo":{"name":"Notes",...}` and the list of its capabilities.
+- `notifications/initialized` gets no answer: it is a notification, it has no `id`.
+- `tools/list` returns `{"tools":[]}`: there are no tools yet.
+
+Stop the process with `Ctrl+C`.
+
+**What to notice:**
+- `initialize` must come first: this is the handshake in which the client and the server agree on the protocol version.
+- The `id` field links each response to its request.
+- This is exactly the exchange that Claude Code and MCP Inspector perform for you. Repeat `tools/list` after module 2 and you will see `list_notes` with its description and argument schema.
+
+**Comprehension question 1.** Why is it pointless to keep such a server running in a separate terminal and expect Claude Code to connect to it? ([answer](#answers-to-comprehension-questions))
 
 ---
 
@@ -163,7 +187,7 @@ By the end of the course the server will support:
 
 **Hints:** `Path.resolve()`, `Path.is_relative_to()`.
 
-**Comprehension question:** why does this check have to be done in the server, rather than hoping the model won't ask for too much?
+**Comprehension question 2.** Why does this check have to be done in the server, rather than hoping the model won't ask for too much? ([answer](#answers-to-comprehension-questions))
 
 ---
 
@@ -190,7 +214,9 @@ By the end of the course the server will support:
 ### Step 6.2 — Observation
 - [ ] Ask Claude: "Create a todo note with three items".
 
-**What to observe:** the permission request before the call. Think about why host caution is especially important for tools that modify data.
+**What to observe:** the permission request before the call.
+
+**Comprehension question 3.** Why is host caution especially important for tools that modify data? ([answer](#answers-to-comprehension-questions))
 
 **Extra:** you can pass `annotations` to `@mcp.tool()` with hints such as `readOnlyHint` and `destructiveHint`. Look up in the SDK documentation how they are set, and mark your tools with them.
 
@@ -235,9 +261,9 @@ Resources are data chosen by the **user**, not the model. Tools are actions chos
 - [ ] In Inspector: the Resources and Resource Templates tabs.
 - [ ] In Claude Code: type `@` in the input line and find the resources of the `notes` server. Attach `notes://index` to a question.
 
-**What to observe:**
-- Which resources appear in the `@` autocomplete: static, templated, or both?
-- How does the situation where you attached a resource differ from the one where Claude called `list_notes` on its own?
+**Comprehension question 4.** Which resources appear in the `@` autocomplete: static, templated, or both? ([answer](#answers-to-comprehension-questions))
+
+**Comprehension question 5.** How does the situation where you attached a resource differ from the one where Claude called `list_notes` on its own? ([answer](#answers-to-comprehension-questions))
 
 ---
 
@@ -256,7 +282,9 @@ Resources are data chosen by the **user**, not the model. Tools are actions chos
 **Hints:** `from mcp.server.mcpserver.prompts.base import Message, UserMessage, AssistantMessage`. The return type is `list[Message]`.
 
 ### Step 9.3 — Check in Claude Code
-- [ ] Type `/` and find a command like `/mcp__notes__summarize_note`. Invoke it with a note name.
+- [ ] Type `/` and find the `/notes:summarize_note (MCP)` command in the list. Invoke it with a note name.
+
+**Hint:** you can also type the same command in its full form: `/mcp__notes__summarize_note <note name>`.
 
 **What to observe:** a prompt is a template that you insert. Unlike tools, the model does not invoke prompts on its own.
 
@@ -272,10 +300,9 @@ Resources are data chosen by the **user**, not the model. Tools are actions chos
 - This file can be committed, and anyone who opens the project in Claude Code will get the server (after confirmation).
 
 ### Step 10.2 — Final question
-- [ ] Put into your own words when to use what:
-  - **tool** — when?
-  - **resource** — when?
-  - **prompt** — when?
+- [ ] Answer the question below in your own words.
+
+**Comprehension question 6.** When to use what: **tool**, **resource**, **prompt**? ([answer](#answers-to-comprehension-questions))
 
 ---
 
@@ -283,3 +310,31 @@ Resources are data chosen by the **user**, not the model. Tools are actions chos
 - Streamable HTTP transport: the same server as a network service, and `claude mcp add --transport http`.
 - Structured tool output: returning Pydantic models and TypedDict.
 - Progress for long-running operations: `ctx.report_progress(...)`.
+
+---
+
+## Answers to comprehension questions
+
+Answer on your own first, then check.
+
+**1. Why is it pointless to keep a stdio server running in a separate terminal?**
+A stdio server receives requests only through stdin and answers only through stdout. That is why only whoever launched it can work with it. If you launch the server in a terminal, only you can talk to it, by hand. Claude Code can't connect to it, so it launches the server itself. That is why `claude mcp add` takes a launch command, not an address.
+
+**2. Why does the path check have to be done in the server?**
+The model is not a security boundary. It can make mistakes, and it can be tricked: for example, the text of a note may contain an instruction like "read `../.env`" (prompt injection). Besides, the model is not the only caller: Inspector, another client, or a script can send any arguments. The server is the only place every file request passes through, so that is the only place the restriction actually works.
+
+**3. Why is host caution especially important for tools that modify data?**
+A mistake while reading can simply be ignored, but a mistake while writing cannot: an overwritten note can't be brought back. The model may misunderstand the request or follow someone else's instruction found in the data it has read. The permission request keeps a human as the last step before an irreversible action. The `readOnlyHint` and `destructiveHint` annotations help the host decide where asking is a must.
+
+**4. Which resources appear in the `@` autocomplete?**
+Expected: only static ones, such as `notes://index`. The server returns them in response to `resources/list`: these are concrete resources with a ready URI. The `notes://{name}` template comes in a separate `resources/templates/list` request and is not a resource by itself until a name is filled in. You can attach a note through the template by typing a concrete URI, for example `@notes:notes://shopping`. Check this on your version of Claude Code: the documentation does not say whether the autocomplete shows templates.
+
+**5. How does an attached resource differ from a `list_notes` call?**
+- **Who decides.** You chose the resource; the model chose to call the tool.
+- **When the data reaches the context.** Claude Code reads an attached resource itself and adds it to your message before the model starts answering. The model calls a tool in the middle of its answer, if it decides it needs to.
+- **Permissions.** Attaching a resource doesn't trigger a permission request: you already gave permission by choosing it. For a tool call, Claude Code asks.
+
+**6. When to use what?**
+- **Tool** — an action or computation the model decides on: search, reading on demand, writing, calling an external API. May have side effects.
+- **Resource** — read-only data with its own URI that the user (or the application) picks to give the model context. No side effects.
+- **Prompt** — a ready-made request template the user runs explicitly, for example as a slash command. The model does not invoke prompts on its own.
