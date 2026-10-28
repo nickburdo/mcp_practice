@@ -183,6 +183,8 @@ Stop the process with `Ctrl+C`.
 
 **Documentation:** [Tools](https://py.sdk.modelcontextprotocol.io/servers/tools/)
 
+**Hint:** in the docstring, state what the name alone doesn't tell: what format `name` is expected in (for example, a file name with the `.md` extension, as returned by `list_notes`).
+
 ### Step 4.2 — Expected errors
 - [ ] If the note doesn't exist, return an error the model can understand instead of crashing with a traceback.
 
@@ -204,7 +206,7 @@ Stop the process with `Ctrl+C`.
 1. Bring the path to its final form: `(NOTES_DIR / name).resolve()`. [`resolve()`](https://docs.python.org/3/library/pathlib.html#pathlib.Path.resolve) makes the path absolute and removes `..`: `notes/../pyproject.toml` becomes `.../mcp_practice/pyproject.toml`.
 2. Check that the result lies inside the notes folder: [`path.is_relative_to(NOTES_DIR.resolve())`](https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.is_relative_to). Resolve the folder too, otherwise you compare paths of different forms.
 3. If the check fails, raise `ToolError`, as in step 4.2.
-4. You will need this check again in `write_note` (step 6.1) and in the `notes://{name}` resource (step 8.2), so it is convenient to move it into a separate function.
+4. You will need this check again in `write_note` (step 5.1) and in the `notes://{name}` resource (step 7.2), so it is convenient to move it into a separate function.
 
 **Check:** in Inspector, both calls, `name="../pyproject.toml"` and `name="C:/Windows/win.ini"`, return an error, not the file contents. `name="shopping-list.md"` still reads fine.
 
@@ -212,27 +214,12 @@ Stop the process with `Ctrl+C`.
 
 ---
 
-## Module 5. Development loop and the description for the model
+## Module 5. A tool that modifies data
 
-### Step 5.1 — How to apply changes
-- [ ] Change something in `server.py` and get Claude Code to see the change.
-
-**Hint:** Claude Code keeps the server process running. After editing the code, the server has to be reconnected via `/mcp` (reconnect), or Claude Code has to be restarted.
-
-### Step 5.2 — The docstring is the interface for the model
-- [ ] Experiment: temporarily make the `read_note` docstring useless (for example, `"""Does stuff."""`) or remove it entirely. Reconnect the server and ask Claude to read the shopping note.
-- [ ] Restore a good docstring: what the tool does and what format `name` is expected in (with or without the `.md` extension).
-
-**What to observe:** how confidently Claude picks the tool and whether it passes the arguments correctly.
-
----
-
-## Module 6. A tool that modifies data
-
-### Step 6.1 — `write_note(name, content)`
+### Step 5.1 — `write_note(name, content)`
 - [ ] Create or overwrite a note. The path protection from step 4.3 is mandatory here too.
 
-### Step 6.2 — Observation
+### Step 5.2 — Observation
 - [ ] Ask Claude: "Create a todo note with three items".
 
 **What to observe:** the permission request before the call.
@@ -243,14 +230,14 @@ Stop the process with `Ctrl+C`.
 
 ---
 
-## Module 7. Logging and the stdout trap
+## Module 6. Logging and the stdout trap
 
-### Step 7.1 — The trap
+### Step 6.1 — The trap
 - [ ] Add a plain `print("debug")` to `list_notes`, reconnect the server, and call the tool through Claude.
 
 **What to observe:** with stdio, the server's stdout is occupied by the protocol, and your `print` goes straight into the JSON-RPC stream. See what happens to the connection. Then remove the `print`.
 
-### Step 7.2 — The right ways
+### Step 6.2 — The right ways
 - [ ] Log to stderr, for example via the standard `logging` module: by default it writes to stderr.
 - [ ] Send a log message to the client through the context.
 
@@ -262,23 +249,23 @@ Stop the process with `Ctrl+C`.
 
 ---
 
-## Module 8. Resources
+## Module 7. Resources
 
 Resources are data chosen by the **user**, not the model. Tools are actions chosen by the model.
 
-### Step 8.1 — Static resource `notes://index`
+### Step 7.1 — Static resource `notes://index`
 - [ ] The resource returns a list of notes with their size or first line.
 
 **Hints:**
 - `@mcp.resource("notes://index")` — a URI without parameters means a static resource, and the function must have no parameters.
 - The returned `str` becomes the text content of the resource. Optional decorator arguments: `name`, `description`, `mime_type`.
 
-### Step 8.2 — Resource template `notes://{name}`
+### Step 7.2 — Resource template `notes://{name}`
 - [ ] The resource returns the contents of a specific note.
 
 **Hints:** `{name}` in the URI must match the function parameter **exactly**. Don't forget the path protection.
 
-### Step 8.3 — Check
+### Step 7.3 — Check
 - [ ] In Inspector: the Resources and Resource Templates tabs.
 - [ ] In Claude Code: type `@` in the input line and find the resources of the `notes` server. Attach `notes://index` to a question.
 
@@ -288,21 +275,21 @@ Resources are data chosen by the **user**, not the model. Tools are actions chos
 
 ---
 
-## Module 9. Prompts
+## Module 8. Prompts
 
-### Step 9.1 — `summarize_note(name)`
+### Step 8.1 — `summarize_note(name)`
 - [ ] The prompt returns the request text "briefly summarize the note …" together with the note's contents.
 
 **Hints:**
 - `@mcp.prompt()`. The returned `str` becomes a user message.
 - The function arguments become the prompt arguments.
 
-### Step 9.2 — Multi-message prompt
+### Step 8.2 — Multi-message prompt
 - [ ] Make a second prompt that returns several messages, for example a "user → assistant" dialogue template.
 
 **Hints:** `from mcp.server.mcpserver.prompts.base import Message, UserMessage, AssistantMessage`. The return type is `list[Message]`.
 
-### Step 9.3 — Check in Claude Code
+### Step 8.3 — Check in Claude Code
 - [ ] Type `/` and find the `/notes:summarize_note (MCP)` command in the list. Invoke it with a note name.
 
 **Hint:** you can also type the same command in its full form: `/mcp__notes__summarize_note <note name>`.
@@ -311,16 +298,16 @@ Resources are data chosen by the **user**, not the model. Tools are actions chos
 
 ---
 
-## Module 10. Wrap-up
+## Module 9. Wrap-up
 
-### Step 10.1 — `project` scope
+### Step 9.1 — `project` scope
 - [ ] Remove the local registration and register the server with `--scope project`.
 
 **What to observe:**
 - A `.mcp.json` file appears in the project root. Study its format.
 - This file can be committed, and anyone who opens the project in Claude Code will get the server (after confirmation).
 
-### Step 10.2 — Final question
+### Step 9.2 — Final question
 - [ ] Answer the question below in your own words.
 
 **Comprehension question 6.** When to use what: **tool**, **resource**, **prompt**? ([answer](#answers-to-comprehension-questions))
