@@ -144,14 +144,21 @@ Stop the process with `Ctrl+C`.
 ## Module 3. Connecting to Claude Code
 
 ### Step 3.1 — Registration
-- [ ] Register the server in Claude Code under the name `notes`.
+- [ ] Open a terminal in the folder where you plan to work with our training MCP server, and register it in Claude:
+  ```bash
+  claude mcp add notes -- uv run --directory C:/path/to/mcp_practice server.py
+  ```
 
-**Hints:**
-- Syntax: `claude mcp add [options] <name> -- <command> [args...]`.
-- Everything after `--` is the command Claude Code will use to launch the server. Its own options (`--scope`, `--env`, `--transport`) go **before** `--`.
-- To make the server launch correctly from any working directory, give uv the path to the project: `uv run --directory C:/Users/nikbu/PycharmProjects/mcp_practice server.py`.
-- The default scope is `local`: the server is available only to you and only in the folder where the command was run.
-- Useful commands: `claude mcp list`, `claude mcp get notes`, `claude mcp remove notes`.
+**Explanations:**
+- `notes` — the name Claude Code will know the server by.
+- `uv run --directory <folder> server.py` — run `server.py` in the project environment from the given folder.
+- Replace `C:/path/to/mcp_practice` with the absolute path to the `mcp_practice` folder that contains `server.py`. If the path contains spaces, wrap it in quotes.
+- The default scope is `local`: the server is available only to you and only in this folder.
+- If you want to set the scope (for example, `user`, to make the server available in all folders) or other options, put them after the server name and before `--`: `claude mcp add notes --scope user -- …`.
+
+**Check:** `claude mcp get notes` shows the command with the full path to your folder.
+
+**If you made a mistake:** run `claude mcp remove notes` and register again. List all servers: `claude mcp list`.
 
 ### Step 3.2 — Check the connection
 - [ ] Run `claude` in the folder where you registered the server.
