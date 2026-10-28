@@ -9,8 +9,9 @@ The goal is to write a minimal local "Notes" MCP server in Python with your own 
 SDK version: `mcp` **2.3.0** (PyPI, October 2026).
 > ⚠️ In SDK v2 the `FastMCP` class was renamed to `MCPServer`. Most tutorials on the internet (and the course in `cli_project`) are written for v1: `from mcp.server.fastmcp import FastMCP`. In v2 this import fails with `ModuleNotFoundError`. If an example from the internet doesn't work, check the version first.
 
-SDK documentation: https://py.sdk.modelcontextprotocol.io
-Claude Code MCP documentation: https://code.claude.com/docs/en/mcp
+### Documentation
+- MCP Python SDK: https://py.sdk.modelcontextprotocol.io
+- Claude Code MCP: https://code.claude.com/docs/en/mcp
 
 ---
 
@@ -181,17 +182,17 @@ Stop the process with `Ctrl+C`.
 ### Step 4.1 — `read_note(name)`
 - [ ] The tool takes a note name and returns its text.
 
+**Documentation:** [Tools](https://py.sdk.modelcontextprotocol.io/servers/tools/)
+
 ### Step 4.2 — Expected errors
 - [ ] If the note doesn't exist, return an error the model can understand instead of crashing with a traceback.
 
-**Hints:**
-- `from mcp.server.mcpserver.exceptions import ToolError`
-- `raise ToolError("message")` — the model will receive a response with `is_error=True` and your text, and will be able to react to it.
-- Any other exception is treated as a "crash": the model will only see `Error executing tool <name>`, without details.
+**Documentation:** [Handling errors](https://py.sdk.modelcontextprotocol.io/servers/handling-errors/)
 
 **Experiment:**
-1. Ask Claude to read a nonexistent note and see how it reacts to `ToolError`.
-2. Temporarily replace `ToolError` with a plain `ValueError` and compare.
+1. After editing `server.py`, reconnect the server in Claude Code: `/mcp` → `notes` → Reconnect. There is no need to register the server again.
+2. Ask Claude to read a nonexistent note and see how it reacts to `ToolError`.
+3. Temporarily replace `ToolError` with a plain `ValueError` and compare.
 
 ### Step 4.3 — Path safety
 - [ ] Forbid reading outside of `notes/`.

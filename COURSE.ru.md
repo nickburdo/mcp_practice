@@ -9,8 +9,9 @@
 Версия SDK: `mcp` **2.3.0** (PyPI, октябрь 2026).
 > ⚠️ В SDK v2 класс `FastMCP` переименован в `MCPServer`. Большинство туториалов в интернете (и курс в `cli_project`) написаны под v1: `from mcp.server.fastmcp import FastMCP`. В v2 этот импорт падает с `ModuleNotFoundError`. Если пример из интернета не работает, сначала проверьте версию.
 
-Документация SDK: https://py.sdk.modelcontextprotocol.io
-Документация Claude Code по MCP: https://code.claude.com/docs/en/mcp
+### Документация 
+- MCP Python SDK: https://py.sdk.modelcontextprotocol.io
+- Claude Code MCP: https://code.claude.com/docs/en/mcp
 
 ---
 
@@ -181,17 +182,17 @@ mcp_practice/
 ### Шаг 4.1 — `read_note(name)`
 - [ ] Инструмент принимает имя заметки и возвращает её текст.
 
+**Документация:** [Tools](https://py.sdk.modelcontextprotocol.io/servers/tools/)
+
 ### Шаг 4.2 — Ожидаемые ошибки
 - [ ] Если заметки нет, вернуть понятную модели ошибку, а не падать с трейсбеком.
 
-**Подсказки:**
-- `from mcp.server.mcpserver.exceptions import ToolError`
-- `raise ToolError("сообщение")` — модель получит ответ с `is_error=True` и вашим текстом и сможет на него отреагировать.
-- Любое другое исключение считается «крашем»: модель увидит только `Error executing tool <name>`, без подробностей.
+**Документация:** [Handling errors](https://py.sdk.modelcontextprotocol.io/servers/handling-errors/)
 
 **Эксперимент:**
-1. Попросите Claude прочитать несуществующую заметку и посмотрите, как он реагирует на `ToolError`.
-2. Временно замените `ToolError` на обычный `ValueError` и сравните.
+1. После правки `server.py` переподключите сервер в Claude Code: `/mcp` → `notes` → Reconnect. Перерегистрировать сервер не нужно.
+2. Попросите Claude прочитать несуществующую заметку и посмотрите, как он реагирует на `ToolError`.
+3. Временно замените `ToolError` на обычный `ValueError` и сравните.
 
 ### Шаг 4.3 — Безопасность путей
 - [ ] Запретить чтение за пределами `notes/`.
