@@ -73,12 +73,10 @@ By the end of the course the server will support:
 ### Step 1.1 — Minimal server
 - [ ] Create `server.py`: a server instance named `"Notes"` that runs over stdio when the file is executed as a script.
 
-**Hints:**
-- `from mcp.server import MCPServer`
-- `MCPServer(name: str)` — creates the server.
+**Documentation:** [First steps](https://py.sdk.modelcontextprotocol.io/get-started/first-steps/), [Connect to a real host](https://py.sdk.modelcontextprotocol.io/get-started/real-host/)
+
+**Hint:**
 - Store the instance in a module-level variable named `mcp`: `mcp = MCPServer("Notes")`. All later hints in the course use this name (`@mcp.tool()`, `@mcp.resource()`, `@mcp.prompt()`), and the `mcp dev` and `mcp run` commands look for an object named `mcp`, `server`, or `app` in the file.
-- `mcp.run()` — runs the server (stdio transport by default).
-- Put the launch under `if __name__ == "__main__":`. The SDK tools (`mcp dev`, `mcp run`) import your file, and the server must not start on import.
 
 ### Step 1.2 — Experiment: be the client yourself
 - [ ] Run `uv run server.py` and paste the three messages below into the terminal one at a time, pressing Enter after each. Each message is a single line of JSON.
@@ -117,14 +115,11 @@ Stop the process with `Ctrl+C`.
 ### Step 2.1 — `list_notes`
 - [ ] Write a `list_notes` tool that returns a sorted list of file names from the `notes/` folder.
 
+**Documentation:** [Tools](https://py.sdk.modelcontextprotocol.io/servers/tools/), [Structured Output](https://py.sdk.modelcontextprotocol.io/servers/structured-output/)
+
 **Hints:**
 - Write the tools right in `server.py`. Importing a function from another file is not enough: it also has to be registered on the server. How to do that is described in the ["Tools in a separate file"](#tools-in-a-separate-file) section at the end of the course.
-- The `@mcp.tool()` decorator (with the parentheses) turns a function into a tool.
 - The server launch (the `if __name__ == "__main__":` block) must stay at the end of the file: `mcp.run()` does not return, and nothing below it will run. Inspector won't reveal this mistake, because `mcp dev` imports the file and skips this block.
-- The SDK builds the tool description for the model itself:
-  - **name** — from the function name;
-  - **description** — from the docstring;
-  - **argument schema** — from the type hints.
 - The docstring is the triple-quoted string right below `def`. It is not just a comment: the SDK sends it to the model as the tool description, and the model uses it to decide when to call the tool. Without a docstring, the model sees only the function name and its arguments. For `list_notes`, this would work, for example:
   ```python
   """List the names of all notes (Markdown files) in the notes folder."""
@@ -135,6 +130,8 @@ Stop the process with `Ctrl+C`.
 ### Step 2.2 — Check in MCP Inspector
 - [ ] Run `uv run mcp dev server.py`.
 - [ ] In the browser that opens, click Connect → **Tools** tab → `list_notes` → Run.
+
+**Documentation:** [First steps](https://py.sdk.modelcontextprotocol.io/get-started/first-steps/) (the section on `mcp dev`)
 
 **Check:** you see the list of your files.
 
@@ -149,6 +146,8 @@ Stop the process with `Ctrl+C`.
   ```bash
   claude mcp add notes -- uv run --directory C:/path/to/mcp_practice server.py
   ```
+
+**Documentation:** [Claude Code: MCP](https://code.claude.com/docs/en/mcp), [Connect to a real host](https://py.sdk.modelcontextprotocol.io/get-started/real-host/)
 
 **Explanations:**
 - `notes` — the name Claude Code will know the server by.
