@@ -219,6 +219,8 @@ Stop the process with `Ctrl+C`.
 ### Step 5.1 — `write_note(name, content)`
 - [ ] Create or overwrite a note. The path protection from step 4.3 is mandatory here too.
 
+**Documentation:** [Tools](https://py.sdk.modelcontextprotocol.io/servers/tools/)
+
 ### Step 5.2 — Observation
 - [ ] Ask Claude: "Create a todo note with three items".
 
@@ -226,7 +228,16 @@ Stop the process with `Ctrl+C`.
 
 **Comprehension question 3.** Why is host caution especially important for tools that modify data? ([answer](#answers-to-comprehension-questions))
 
-**Extra:** you can pass `annotations` to `@mcp.tool()` with hints such as `readOnlyHint` and `destructiveHint`. Look up in the SDK documentation how they are set, and mark your tools with them.
+**Extra:** mark your tools with annotations. Documentation: [Names, titles, and annotations](https://py.sdk.modelcontextprotocol.io/servers/tools/#names-titles-and-annotations).
+
+| Annotation | The question it answers | For which tools |
+|---|---|---|
+| `read_only_hint` | Does the tool change nothing? | read-only tools |
+| `destructive_hint` | Can it delete or overwrite existing data? | modifying tools only |
+| `idempotent_hint` | Is a repeated call with the same arguments safe, with the same result? | modifying tools only |
+| `open_world_hint` | Does it work with the outside world (the internet) rather than a closed set of data? | any tool |
+
+Each annotation takes only `True` or `False`.
 
 ---
 
