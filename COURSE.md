@@ -57,6 +57,14 @@ By the end of the course the server will support:
 - [ ] Create a `notes/` folder and put 2–3 `.md` files with any text into it.
 - [ ] Delete the `main.py` file created by `uv init`: it is not needed (or rename it to `server.py`).
 
+> If there is no `main.py` and a `src/` folder appeared instead (this is what `uv init --package` and the PyCharm uv template do), the project was created as an installable package. The course needs a flat layout with `server.py` in the root, so:
+> - Delete the `src/` folder entirely.
+> - Remove the `[project.scripts]` section from `pyproject.toml`: it points to the `main` function in the deleted folder.
+> - Remove the `[build-system]` section from `pyproject.toml`. Without it, uv treats the project as a plain application and does not try to build and install a package on every `uv run`.
+> - Run `uv sync` to remove the old package installation from `.venv`. Otherwise every run prints the warning `mcp_practice.pth: ...\src does not exist; skipping sys.path append`.
+>
+> **Check:** `uv run python -c "import mcp.server.mcpserver"` still runs without errors.
+
 ---
 
 ## Module 1. Server skeleton
