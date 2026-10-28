@@ -241,22 +241,33 @@ mcp_practice/
 
 ---
 
-## Модуль 6. Логирование и ловушка stdout
+## Модуль 6. Логирование
 
-### Шаг 6.1 — Ловушка
-- [ ] Добавить в `list_notes` обычный `print("debug")`, переподключить сервер и вызвать инструмент через Claude.
+**Главное:**
+- Не используйте `print()`: у stdio-сервера stdout — канал протокола, и каждая строка в нём должна быть сообщением JSON-RPC. SDK v2 защищает stdout, пока сервер работает, но `print()` до запуска сервера всё равно попадёт в канал.
+- Логируйте через стандартный модуль `logging`: он пишет в stderr и протоколу не мешает.
+- Логи видны в терминале при ручном запуске и в Inspector. В клиенте, например в Claude Code, в обычной работе их не видно: это инструмент разработчика сервера.
 
-**Что наблюдать:** при stdio stdout сервера занят протоколом, и ваш `print` попадает прямо в поток JSON-RPC. Посмотрите, что происходит с подключением. Потом уберите `print`.
+**Документация:** [Logging](https://py.sdk.modelcontextprotocol.io/handlers/logging/)
 
-### Шаг 6.2 — Правильные способы
-- [ ] Логировать в stderr, например через стандартный `logging`: по умолчанию он пишет в stderr.
-- [ ] Отправить лог-сообщение клиенту через контекст.
+### Шаг 6.1 — Логирование
+- [ ] Добавить в `list_notes` запись в лог через `logging`.
+- [ ] **Терминал:** запустить `uv run server.py`, вставить по очереди три сообщения и найти свою запись:
+  1. `initialize`:
+     ```json
+     {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"manual","version":"0.1"}}}
+     ```
+  2. `notifications/initialized`:
+     ```json
+     {"jsonrpc":"2.0","method":"notifications/initialized"}
+     ```
+  3. Вызов `list_notes`:
+     ```json
+     {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_notes","arguments":{}}}
+     ```
+- [ ] **Inspector:** запустить `uv run mcp dev server.py`, вызвать `list_notes` и найти свою запись.
 
-**Подсказки:**
-- `from mcp.server.mcpserver import Context`
-- Добавьте в инструмент параметр с аннотацией `Context`, например `ctx: Context`. SDK подставит его сам, а в схему аргументов для модели он не попадёт.
-- `await ctx.info("...")` (а также `debug`, `warning`, `error`). Функция-инструмент при этом должна быть `async def`.
-- Посмотрите эти логи в Inspector (`mcp dev`).
+**Примечание:** отправлять логи клиенту через `Context` (`ctx.info()` и т.п.) не нужно: в протоколе 2026-07-28 эта возможность объявлена устаревшей ([Deprecated features](https://py.sdk.modelcontextprotocol.io/deprecated/)).
 
 ---
 

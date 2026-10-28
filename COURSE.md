@@ -241,22 +241,33 @@ Each annotation takes only `True` or `False`.
 
 ---
 
-## Module 6. Logging and the stdout trap
+## Module 6. Logging
 
-### Step 6.1 — The trap
-- [ ] Add a plain `print("debug")` to `list_notes`, reconnect the server, and call the tool through Claude.
+**Key points:**
+- Don't use `print()`: for a stdio server, stdout is the protocol channel, and every line in it must be a JSON-RPC message. SDK v2 protects stdout while the server is running, but a `print()` before the server starts still goes into the channel.
+- Log with the standard `logging` module: it writes to stderr and doesn't interfere with the protocol.
+- Logs are visible in the terminal when you run the server by hand, and in Inspector. In a client such as Claude Code they are not visible during normal work: they are a tool for the server developer.
 
-**What to observe:** with stdio, the server's stdout is occupied by the protocol, and your `print` goes straight into the JSON-RPC stream. See what happens to the connection. Then remove the `print`.
+**Documentation:** [Logging](https://py.sdk.modelcontextprotocol.io/handlers/logging/)
 
-### Step 6.2 — The right ways
-- [ ] Log to stderr, for example via the standard `logging` module: by default it writes to stderr.
-- [ ] Send a log message to the client through the context.
+### Step 6.1 — Logging
+- [ ] Add a log record to `list_notes` using `logging`.
+- [ ] **Terminal:** run `uv run server.py`, paste three messages one at a time, and find your record:
+  1. `initialize`:
+     ```json
+     {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"manual","version":"0.1"}}}
+     ```
+  2. `notifications/initialized`:
+     ```json
+     {"jsonrpc":"2.0","method":"notifications/initialized"}
+     ```
+  3. The `list_notes` call:
+     ```json
+     {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_notes","arguments":{}}}
+     ```
+- [ ] **Inspector:** run `uv run mcp dev server.py`, call `list_notes`, and find your record.
 
-**Hints:**
-- `from mcp.server.mcpserver import Context`
-- Add a parameter annotated with `Context` to the tool, for example `ctx: Context`. The SDK will inject it itself, and it won't appear in the argument schema for the model.
-- `await ctx.info("...")` (as well as `debug`, `warning`, `error`). The tool function must then be `async def`.
-- Look at these logs in Inspector (`mcp dev`).
+**Note:** there is no need to send logs to the client through `Context` (`ctx.info()` and so on): the 2026-07-28 protocol deprecates this capability ([Deprecated features](https://py.sdk.modelcontextprotocol.io/deprecated/)).
 
 ---
 
