@@ -172,7 +172,7 @@ mcp_practice/
 4. Эта проверка понадобится ещё в `write_note` (шаг 4.1) и в ресурсе `notes://{name}` (шаг 6.2), поэтому удобно вынести её в отдельную функцию.
 
 ### Шаг 3.4 — Проверка в Inspector
-**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. [примечание к шагу 2.2](#шаг-22--проверка-в-mcp-inspector)).
+**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. примечание к шагу 2.2).
 
 - [ ] Вызвать `read_note` с именем существующей заметки, например `shopping-list.md`.
 - [ ] Вызвать `read_note` с именем несуществующей заметки.
@@ -199,11 +199,11 @@ mcp_practice/
 **Документация:** [Tools](https://py.sdk.modelcontextprotocol.io/servers/tools/)
 
 ### Шаг 4.2 — Проверка в Inspector
-**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. [примечание к шагу 2.2](#шаг-22--проверка-в-mcp-inspector)).
+**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. примечание к шагу 2.2).
 
 - [ ] Вызвать `write_note` с именем `todo.md` и любым текстом.
 
-**Проверка:** в папке `notes/` появился файл `todo.md`, а `read_note` возвращает его текст.
+**Ожидаемый результат:** в папке `notes/` появился файл `todo.md`, а `read_note` возвращает его текст.
 
 Inspector вызывает инструмент сразу. Клиенты перед вызовом спрашивают разрешение: это вы увидите в модуле 8.
 
@@ -244,7 +244,7 @@ Inspector вызывает инструмент сразу. Клиенты пе�
      ```json
      {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_notes","arguments":{}}}
      ```
-- [ ] **Проверка в Inspector:** переподключить сервер (Disconnect → Connect, см. [примечание к шагу 2.2](#шаг-22--проверка-в-mcp-inspector)), вызвать `list_notes` и найти свою запись. Если Inspector не запущен, запустите его командой `uv run mcp dev server.py`.
+- [ ] **Проверка в Inspector:** переподключить сервер (Disconnect → Connect, см. примечание к шагу 2.2), вызвать `list_notes` и найти свою запись. Если Inspector не запущен, запустите его командой `uv run mcp dev server.py`.
 
 **Примечание:** отправлять логи клиенту через `Context` (`ctx.info()` и т.п.) не нужно: в протоколе 2026-07-28 эта возможность объявлена устаревшей ([Deprecated features](https://py.sdk.modelcontextprotocol.io/deprecated/)).
 
@@ -269,12 +269,12 @@ Inspector вызывает инструмент сразу. Клиенты пе�
 - Если заметки нет, бросьте `ResourceNotFoundError`, а не `ToolError`: это ошибка для ресурсов ([Handling errors: A resource that doesn't exist](https://py.sdk.modelcontextprotocol.io/servers/handling-errors/#a-resource-that-doesnt-exist)).
 
 ### Шаг 6.3 — Проверка в Inspector
-**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. [примечание к шагу 2.2](#шаг-22--проверка-в-mcp-inspector)).
+**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. примечание к шагу 2.2).
 
 - [ ] На вкладке Resources открыть `notes://index`.
 - [ ] На вкладке Resource Templates открыть `notes://{name}`, подставив имя заметки, например `shopping-list.md`.
 
-**Проверка:** `notes://index` показывает список заметок, а `notes://shopping-list.md` — текст заметки.
+**Ожидаемый результат:** `notes://index` показывает список заметок, а `notes://shopping-list.md` — текст заметки.
 
 Как ресурсы выглядят в клиентах, вы увидите в модуле 8.
 
@@ -295,12 +295,12 @@ Inspector вызывает инструмент сразу. Клиенты пе�
 **Документация:** [Prompts: More than one message](https://py.sdk.modelcontextprotocol.io/servers/prompts/#more-than-one-message)
 
 ### Шаг 7.3 — Проверка в Inspector
-**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. [примечание к шагу 2.2](#шаг-22--проверка-в-mcp-inspector)).
+**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. примечание к шагу 2.2).
 
 - [ ] На вкладке Prompts выбрать `summarize_note`, ввести имя заметки и нажать Get Prompt.
 - [ ] Так же проверить второй промпт.
 
-**Проверка:** `summarize_note` возвращает одно сообщение с просьбой и текстом заметки, второй промпт — несколько сообщений с ролями `user` и `assistant`.
+**Ожидаемый результат:** `summarize_note` возвращает одно сообщение с просьбой и текстом заметки, второй промпт — несколько сообщений с ролями `user` и `assistant`.
 
 **Что наблюдать:** промпт — это заготовка, которую подставляете вы. Модель не вызывает промпты сама, в отличие от инструментов.
 
