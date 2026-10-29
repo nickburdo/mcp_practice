@@ -23,8 +23,9 @@ mcp_practice/
 ├── COURSE.md        ← this file
 ├── server.py        ← your MCP server
 └── notes/           ← the "database": plain .md files
-    ├── shopping.md
-    └── ideas.md
+    ├── mcp-overview.md
+    ├── meeting-notes.md
+    └── shopping-list.md
 ```
 
 By the end of the course the server will support:
@@ -136,7 +137,9 @@ Stop the process with `Ctrl+C`.
 
 **Documentation:** [First steps](https://py.sdk.modelcontextprotocol.io/get-started/first-steps/) (the section on `mcp dev`)
 
-**Check:** you see the list of your files.
+**Hint:** on the first run, `npx` asks whether it may install the `@modelcontextprotocol/inspector` package. Answer `y`: you only need to do this once.
+
+**Expected result:** you see the list of your files.
 
 **Why this step:** Inspector is also an MCP client, just a manual one. This way you debug the server without involving the model and see the raw JSON of requests and responses.
 
@@ -288,6 +291,8 @@ You will see how resources look in the clients in module 8.
 **Why exactly `summarize_note`:** the function name becomes the prompt name. You will look for the prompt by this name in Inspector (step 7.3) and in the clients (module 8), so give the function exactly this name.
 
 **Documentation:** [Prompts](https://py.sdk.modelcontextprotocol.io/servers/prompts/)
+
+**Hint:** if the note doesn't exist, `ToolError` won't help in a prompt: the SDK replaces the text of any exception other than `MCPError` with a generic "Error rendering prompt summarize_note". To let the client see the reason, raise `MCPError(INVALID_PARAMS, ...)` from `mcp.shared.exceptions`, and take the `INVALID_PARAMS` constant from `mcp.types`.
 
 ### Step 7.2 — Prompt with several messages
 - [ ] Make a second prompt that returns several messages, for example a "user → assistant" dialogue template.
@@ -567,7 +572,7 @@ A stdio server receives requests only through stdin and answers only through std
 The model is not a security boundary. It can make mistakes, and it can be tricked: for example, the text of a note may contain an instruction like "read `../.env`" (prompt injection). Besides, the model is not the only caller: Inspector, another client, or a script can send any arguments. The server is the only place every file request passes through, so that is the only place the restriction actually works.
 
 **3. Why is host caution especially important for tools that modify data?**
-A mistake while reading can simply be ignored, but a mistake while writing cannot: an overwritten note can't be brought back. The model may misunderstand the request or follow someone else's instruction found in the data it has read. The permission request keeps a human as the last step before an irreversible action. The `readOnlyHint` and `destructiveHint` annotations help the host decide where asking is a must.
+A mistake while reading can simply be ignored, but a mistake while writing cannot: an overwritten note can't be brought back. The model may misunderstand the request or follow someone else's instruction found in the data it has read. The permission request keeps a human as the last step before an irreversible action. The `read_only_hint` and `destructive_hint` annotations (`readOnlyHint` and `destructiveHint` in the protocol) help the host decide where asking is a must.
 
 **4. Which resources does a client offer for attaching?**
 Only static ones, such as `notes://index`. The server returns them in response to `resources/list`: these are concrete resources with a ready address. The `notes://{name}` template comes in a separate `resources/templates/list` request as an address pattern, not as a list of notes. Neither Claude Code nor Claude Desktop Chat shows it, so you can't attach a note by the template. Inspector does work with templates: you can fill in a name there and read the resource.
