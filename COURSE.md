@@ -305,20 +305,22 @@ Read the documentation first: [Resources](https://py.sdk.modelcontextprotocol.io
 
 ## Module 8. Prompts
 
-### Step 8.1 — `summarize_note(name)`
-- [ ] The prompt returns the request text "briefly summarize the note …" together with the note's contents.
+### Step 8.1 — Single-message prompt
+- [ ] Add a function `summarize_note(name)` decorated with `@mcp.prompt()` to `server.py`. The function reads the note and returns a string: a request to briefly summarize the note, followed by the note's text.
 
-**Hints:**
-- `@mcp.prompt()`. The returned `str` becomes a user message.
-- The function arguments become the prompt arguments.
+**Why exactly `summarize_note`:** the function name becomes the prompt name. In step 8.3 you will look for the `/notes:summarize_note` command in Claude Code, so give the function exactly this name.
 
-### Step 8.2 — Multi-message prompt
+**Documentation:** [Prompts](https://py.sdk.modelcontextprotocol.io/servers/prompts/)
+
+### Step 8.2 — Prompt with several messages
 - [ ] Make a second prompt that returns several messages, for example a "user → assistant" dialogue template.
 
-**Hints:** `from mcp.server.mcpserver.prompts.base import Message, UserMessage, AssistantMessage`. The return type is `list[Message]`.
+**Documentation:** [Prompts: More than one message](https://py.sdk.modelcontextprotocol.io/servers/prompts/#more-than-one-message)
 
 ### Step 8.3 — Check in Claude Code
 - [ ] Type `/` and find the `/notes:summarize_note (MCP)` command in the list. Invoke it with a note name.
+
+**Documentation:** [Claude Code: MCP](https://code.claude.com/docs/en/mcp)
 
 **Hint:** you can also type the same command in its full form: `/mcp__notes__summarize_note <note name>`.
 

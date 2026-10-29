@@ -1,10 +1,11 @@
 import logging
-from encodings import utf_8
 from pathlib import Path
 
 from mcp.server import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError, ResourceNotFoundError
-from mcp.types import ToolAnnotations
+from mcp.shared.exceptions import MCPError
+from mcp.types import INVALID_PARAMS, ToolAnnotations
+from mcp.server.mcpserver.prompts.base import AssistantMessage, Message, UserMessage
 
 NOTES_DIR = Path(__file__).parent / "notes"
 
@@ -76,6 +77,31 @@ def note_content(name: str) -> str:
         return read_note(name)
     except ToolError as e:
         raise ResourceNotFoundError(str(e)) from e
+
+
+@mcp.prompt()
+def summarize_note(name: str) -> str:
+    """Briefly summarize a note from the notes folder."""
+    try:
+        text = read_note(name)
+    except ToolError as e:
+        # Only MCPError reaches the client with its message; other errors become a generic one
+        raise MCPError(INVALID_PARAMS, str(e)) from e
+    return f"Briefly summarize the note '{name}':\n\n{text}"
+
+
+@mcp.prompt()
+def discuss_note(name: str) -> list[Message]:
+    """Start a conversation about a note from the notes folder."""
+    try:
+        text = read_note(name)
+    except ToolError as e:
+        raise MCPError(INVALID_PARAMS, str(e)) from e
+    return [
+        UserMessage(f"Here is my note '{name}':"),
+        UserMessage(text),
+        AssistantMessage("I've read the note. What would you like to do with it?"),
+    ]
 
 
 if __name__ == "__main__":
