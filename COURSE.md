@@ -140,6 +140,8 @@ Stop the process with `Ctrl+C`.
 
 **Why this step:** Inspector is also an MCP client, just a manual one. This way you debug the server without involving the model and see the raw JSON of requests and responses.
 
+**Note:** Inspector doesn't pick up changes in `server.py` on its own. To make it see the new code, click Disconnect and then Connect: Inspector starts the server again. There is no need to restart `mcp dev`.
+
 ---
 
 ## Module 3. Reading a note and error handling
@@ -156,13 +158,6 @@ Stop the process with `Ctrl+C`.
 
 **Documentation:** [Handling errors](https://py.sdk.modelcontextprotocol.io/servers/handling-errors/)
 
-**Experiment in Inspector:**
-1. After editing `server.py`, reconnect in Inspector: Disconnect → Connect. There is no need to restart `mcp dev`.
-2. Call `read_note` with the name of a nonexistent note. Inspector shows an error with your text.
-3. Temporarily replace `ToolError` with a plain `ValueError` and call it again. Your text is gone, and only a generic "Error executing tool read_note" remains: the SDK doesn't pass the messages of unexpected exceptions to the client.
-
-You will see how the model reacts to such an error in module 8.
-
 ### Step 3.3 — Path safety
 - [ ] Forbid reading outside of `notes/`.
 
@@ -176,9 +171,21 @@ You will see how the model reacts to such an error in module 8.
 3. If the check fails, raise `ToolError`, as in step 3.2.
 4. You will need this check again in `write_note` (step 4.1) and in the `notes://{name}` resource (step 6.2), so it is convenient to move it into a separate function.
 
-**Check:** in Inspector, both calls, `name="../pyproject.toml"` and `name="C:/Windows/win.ini"`, return an error, not the file contents. `name="shopping-list.md"` still reads fine.
+### Step 3.4 — Check in Inspector
+- [ ] Call `read_note` with the name of an existing note, for example `shopping-list.md`.
+- [ ] Call `read_note` with the name of a nonexistent note.
+- [ ] Call `read_note` with `name="../pyproject.toml"` and with `name="C:/Windows/win.ini"` (on macOS and Linux, `name="/etc/hosts"`).
 
-**Comprehension question 2.** Why does this check have to be done in the server, rather than hoping the model won't ask for too much? ([answer](#answers-to-comprehension-questions))
+**Check:**
+- the existing note returns its text;
+- for the nonexistent note, Inspector shows an error with your text;
+- both dangerous paths return an error, not the file contents.
+
+**Experiment:** temporarily replace `ToolError` with a plain `ValueError` and call `read_note` with a nonexistent note again. Your text is gone, and only a generic "Error executing tool read_note" remains: the SDK doesn't pass the messages of unexpected exceptions to the client. After the experiment, put `ToolError` back.
+
+You will see how the model reacts to such an error in module 8.
+
+**Comprehension question 2.** Why does the path check have to be done in the server, rather than hoping the model won't ask for too much? ([answer](#answers-to-comprehension-questions))
 
 ---
 
