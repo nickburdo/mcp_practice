@@ -172,11 +172,13 @@ mcp_practice/
 4. Эта проверка понадобится ещё в `write_note` (шаг 4.1) и в ресурсе `notes://{name}` (шаг 6.2), поэтому удобно вынести её в отдельную функцию.
 
 ### Шаг 3.4 — Проверка в Inspector
+**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. [примечание к шагу 2.2](#шаг-22--проверка-в-mcp-inspector)).
+
 - [ ] Вызвать `read_note` с именем существующей заметки, например `shopping-list.md`.
 - [ ] Вызвать `read_note` с именем несуществующей заметки.
 - [ ] Вызвать `read_note` с `name="../pyproject.toml"` и с `name="C:/Windows/win.ini"` (на macOS и Linux — `name="/etc/hosts"`).
 
-**Проверка:**
+**Ожидаемый результат:**
 - существующая заметка возвращает свой текст;
 - для несуществующей заметки Inspector показывает ошибку с вашим текстом;
 - оба опасных пути возвращают ошибку, а не содержимое файла.
@@ -197,6 +199,8 @@ mcp_practice/
 **Документация:** [Tools](https://py.sdk.modelcontextprotocol.io/servers/tools/)
 
 ### Шаг 4.2 — Проверка в Inspector
+**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. [примечание к шагу 2.2](#шаг-22--проверка-в-mcp-inspector)).
+
 - [ ] Вызвать `write_note` с именем `todo.md` и любым текстом.
 
 **Проверка:** в папке `notes/` появился файл `todo.md`, а `read_note` возвращает его текст.
@@ -227,7 +231,7 @@ Inspector вызывает инструмент сразу. Клиенты пе�
 
 ### Шаг 5.1 — Логирование
 - [ ] Добавить в `list_notes` запись в лог через `logging`.
-- [ ] **Терминал:** запустить `uv run server.py`, вставить по очереди три сообщения и найти свою запись:
+- [ ] **Проверка в терминале:** запустить `uv run server.py`, вставить по очереди три сообщения и найти свою запись:
   1. `initialize`:
      ```json
      {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"manual","version":"0.1"}}}
@@ -240,7 +244,7 @@ Inspector вызывает инструмент сразу. Клиенты пе�
      ```json
      {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_notes","arguments":{}}}
      ```
-- [ ] **Inspector:** запустить `uv run mcp dev server.py`, вызвать `list_notes` и найти свою запись.
+- [ ] **Проверка в Inspector:** переподключить сервер (Disconnect → Connect, см. [примечание к шагу 2.2](#шаг-22--проверка-в-mcp-inspector)), вызвать `list_notes` и найти свою запись. Если Inspector не запущен, запустите его командой `uv run mcp dev server.py`.
 
 **Примечание:** отправлять логи клиенту через `Context` (`ctx.info()` и т.п.) не нужно: в протоколе 2026-07-28 эта возможность объявлена устаревшей ([Deprecated features](https://py.sdk.modelcontextprotocol.io/deprecated/)).
 
@@ -265,6 +269,8 @@ Inspector вызывает инструмент сразу. Клиенты пе�
 - Если заметки нет, бросьте `ResourceNotFoundError`, а не `ToolError`: это ошибка для ресурсов ([Handling errors: A resource that doesn't exist](https://py.sdk.modelcontextprotocol.io/servers/handling-errors/#a-resource-that-doesnt-exist)).
 
 ### Шаг 6.3 — Проверка в Inspector
+**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. [примечание к шагу 2.2](#шаг-22--проверка-в-mcp-inspector)).
+
 - [ ] На вкладке Resources открыть `notes://index`.
 - [ ] На вкладке Resource Templates открыть `notes://{name}`, подставив имя заметки, например `shopping-list.md`.
 
@@ -289,6 +295,8 @@ Inspector вызывает инструмент сразу. Клиенты пе�
 **Документация:** [Prompts: More than one message](https://py.sdk.modelcontextprotocol.io/servers/prompts/#more-than-one-message)
 
 ### Шаг 7.3 — Проверка в Inspector
+**Напоминание:** чтобы Inspector подхватил изменения в `server.py`, переподключите сервер: Disconnect → Connect (см. [примечание к шагу 2.2](#шаг-22--проверка-в-mcp-inspector)).
+
 - [ ] На вкладке Prompts выбрать `summarize_note`, ввести имя заметки и нажать Get Prompt.
 - [ ] Так же проверить второй промпт.
 

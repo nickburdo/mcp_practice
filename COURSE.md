@@ -172,11 +172,13 @@ Stop the process with `Ctrl+C`.
 4. You will need this check again in `write_note` (step 4.1) and in the `notes://{name}` resource (step 6.2), so it is convenient to move it into a separate function.
 
 ### Step 3.4 — Check in Inspector
+**Reminder:** to make Inspector pick up the changes in `server.py`, reconnect the server: Disconnect → Connect (see the [note to step 2.2](#step-22--check-in-mcp-inspector)).
+
 - [ ] Call `read_note` with the name of an existing note, for example `shopping-list.md`.
 - [ ] Call `read_note` with the name of a nonexistent note.
 - [ ] Call `read_note` with `name="../pyproject.toml"` and with `name="C:/Windows/win.ini"` (on macOS and Linux, `name="/etc/hosts"`).
 
-**Check:**
+**Expected result:**
 - the existing note returns its text;
 - for the nonexistent note, Inspector shows an error with your text;
 - both dangerous paths return an error, not the file contents.
@@ -197,6 +199,8 @@ You will see how the model reacts to such an error in module 8.
 **Documentation:** [Tools](https://py.sdk.modelcontextprotocol.io/servers/tools/)
 
 ### Step 4.2 — Check in Inspector
+**Reminder:** to make Inspector pick up the changes in `server.py`, reconnect the server: Disconnect → Connect (see the [note to step 2.2](#step-22--check-in-mcp-inspector)).
+
 - [ ] Call `write_note` with the name `todo.md` and any text.
 
 **Check:** a `todo.md` file appeared in the `notes/` folder, and `read_note` returns its text.
@@ -227,7 +231,7 @@ Each annotation takes only `True` or `False`.
 
 ### Step 5.1 — Logging
 - [ ] Add a log record to `list_notes` using `logging`.
-- [ ] **Terminal:** run `uv run server.py`, paste three messages one at a time, and find your record:
+- [ ] **Check in the terminal:** run `uv run server.py`, paste three messages one at a time, and find your record:
   1. `initialize`:
      ```json
      {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"manual","version":"0.1"}}}
@@ -240,7 +244,7 @@ Each annotation takes only `True` or `False`.
      ```json
      {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_notes","arguments":{}}}
      ```
-- [ ] **Inspector:** run `uv run mcp dev server.py`, call `list_notes`, and find your record.
+- [ ] **Check in Inspector:** reconnect the server (Disconnect → Connect, see the [note to step 2.2](#step-22--check-in-mcp-inspector)), call `list_notes`, and find your record. If Inspector is not running, start it with `uv run mcp dev server.py`.
 
 **Note:** there is no need to send logs to the client through `Context` (`ctx.info()` and so on): the 2026-07-28 protocol deprecates this capability ([Deprecated features](https://py.sdk.modelcontextprotocol.io/deprecated/)).
 
@@ -265,6 +269,8 @@ Read the documentation first: [Resources](https://py.sdk.modelcontextprotocol.io
 - If the note doesn't exist, raise `ResourceNotFoundError`, not `ToolError`: this is the error for resources ([Handling errors: A resource that doesn't exist](https://py.sdk.modelcontextprotocol.io/servers/handling-errors/#a-resource-that-doesnt-exist)).
 
 ### Step 6.3 — Check in Inspector
+**Reminder:** to make Inspector pick up the changes in `server.py`, reconnect the server: Disconnect → Connect (see the [note to step 2.2](#step-22--check-in-mcp-inspector)).
+
 - [ ] On the Resources tab, open `notes://index`.
 - [ ] On the Resource Templates tab, open `notes://{name}` with a note name filled in, for example `shopping-list.md`.
 
@@ -289,6 +295,8 @@ You will see how resources look in the clients in module 8.
 **Documentation:** [Prompts: More than one message](https://py.sdk.modelcontextprotocol.io/servers/prompts/#more-than-one-message)
 
 ### Step 7.3 — Check in Inspector
+**Reminder:** to make Inspector pick up the changes in `server.py`, reconnect the server: Disconnect → Connect (see the [note to step 2.2](#step-22--check-in-mcp-inspector)).
+
 - [ ] On the Prompts tab, select `summarize_note`, enter a note name, and click Get Prompt.
 - [ ] Check the second prompt the same way.
 
