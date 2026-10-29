@@ -1,0 +1,12 @@
+[project]
+name = "mcp-practice"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Mykola Burdo", email = "72523519+nickburdo@users.noreply.github.com" }
+]
+requires-python = ">=3.15"
+dependencies = [
+    "mcp[cli]>=2.3.0",
+]
