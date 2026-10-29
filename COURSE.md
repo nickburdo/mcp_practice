@@ -310,7 +310,7 @@ You will see how resources look in the clients in module 8.
 
 The server is ready and checked in Inspector. Now let's connect it to two clients, Claude Code and Claude Desktop Chat, and see how the model works with it.
 
-### Step 8.1 — Claude Code: registration
+### Step 8.1 — Claude Code: adding the MCP server
 - [ ] Make sure `claude --version` prints a version.
 - [ ] Open a terminal in the folder where you plan to work with the server, and register it:
   ```bash
@@ -321,7 +321,7 @@ The server is ready and checked in Inspector. Now let's connect it to two client
 
 **Explanations:**
 - `notes` — the name Claude Code will know the server by.
-- `uv run --directory <folder> server.py` — run `server.py` in the project environment from the given folder.
+- `uv run --directory <folder> server.py` — runs `server.py` in the project environment from the given folder.
 - Replace `C:/path/to/mcp_practice` with the absolute path to the `mcp_practice` folder that contains `server.py`. If the path contains spaces, wrap it in quotes.
 
 **The scope** determines where the server is available and where its registration is stored. Put it after the server name and before `--`: `claude mcp add notes --scope user -- …`.
@@ -336,26 +336,27 @@ The server is ready and checked in Inspector. Now let's connect it to two client
 - If the server is registered in several scopes, one entry is used, in order of precedence: `local`, then `project`, then `user`.
 - `local` is fine for the course. To take a look at `.mcp.json`, you can register the server with `--scope project` and open the file in the folder root.
 
-**Check:** `claude mcp get notes` shows the command with the full path to your folder.
-
-**If you made a mistake:** run `claude mcp remove notes` and register again. List all servers: `claude mcp list`.
-
-### Step 8.2 — Claude Code: connection
+- [ ] Run `claude mcp get notes`.
 - [ ] Run `claude` in the folder where you registered the server.
 - [ ] Run `/mcp`.
 
-**Check:** the `notes` server has the status connected, and its list of tools contains `list_notes`, `read_note`, and `write_note`.
+**Expected result:**
+- `claude mcp get notes` shows the command with the full path to your folder;
+- in `/mcp`, the `notes` server has the status connected, and its list of tools contains `list_notes`, `read_note`, and `write_note`.
 
-**Hint:** after editing `server.py`, reconnect the server: `/mcp` → `notes` → Reconnect. There is no need to register it again.
+**If you made a mistake:** run `claude mcp remove notes` and register again. List all servers: `claude mcp list`.
 
-### Step 8.3 — Claude Code: check
+**Hint:** after editing `server.py`, reconnect the server: `/mcp` → `notes` → Reconnect. There is no need to remove and add the server again or to start a new session.
 
-**Tools:**
+### Step 8.2 — Claude Code: check
+
+#### Tools
+
 - [ ] Ask Claude: "What notes do I have?"
 - [ ] Ask it to read a nonexistent note.
 - [ ] Ask: "Create a todo note with three items".
 
-**What to observe:**
+**Expected result:**
 - Claude calls the `mcp__notes__list_notes` tool. This is the full name: `mcp__<server>__<tool>`.
 - You didn't tell Claude the tool exists. It learned about it from the description the client received from the server.
 - For a nonexistent note, Claude receives the text of your `ToolError` (step 3.2) and can explain what went wrong.
@@ -363,8 +364,13 @@ The server is ready and checked in Inspector. Now let's connect it to two client
 
 **Comprehension question 3.** Why is host caution especially important for tools that modify data? ([answer](#answers-to-comprehension-questions))
 
-**Resources:**
-- [ ] Type `@` in the input line, find the resources of the `notes` server, and attach `notes://index` to a question.
+#### Resources
+
+- [ ] Type `@` in the input line, find the resources of the `notes` server, and attach `notes://index` to a question about your notes.
+
+**Expected result:**
+- the `@` list contains `notes://index`, but not the `notes://{name}` template;
+- Claude answers from the attached list of notes and doesn't need to call `list_notes`.
 
 > **Resource templates in clients.** The `@` autocomplete contains only static resources, so you can't attach a note by the `notes://{name}` template. Claude Desktop Chat doesn't show templates either, so in this course the template is checked only in Inspector. If you need to attach notes in a client, register each one as a separate resource: see the ["Notes in the resource list"](#notes-in-the-resource-list) section at the end of the course.
 
@@ -372,16 +378,20 @@ The server is ready and checked in Inspector. Now let's connect it to two client
 
 **Comprehension question 5.** How does the situation where you attached a resource differ from the one where Claude called `list_notes` on its own? ([answer](#answers-to-comprehension-questions))
 
-**Prompts:**
+#### Prompts
+
 - [ ] Type `/`, find the `/notes:summarize_note (MCP)` command in the list, and invoke it with a note name.
+
+**Expected result:** Claude receives the request and the note's text from the prompt and answers with a brief summary.
 
 **Hint:** you can also type the same command in its full form: `/mcp__notes__summarize_note <note name>`.
 
 > **Prompts with several messages** don't work in Claude Code. Check the second prompt from step 7.2 in Claude Desktop Chat.
 
-### Step 8.4 — Claude Desktop Chat: registration
+### Step 8.3 — Claude Desktop Chat: adding the MCP server
 - [ ] Open Claude Desktop and switch to the chat tab: the tab switcher is at the top of the left sidebar, on the right. Select the chat mode (Chat) specifically, not Cowork. This matters: in other modes some of our server's features are unavailable.
-- [ ] In the app menu (not in the account settings inside the window), open Settings → Developer → Edit Config. This opens the `claude_desktop_config.json` file: on Windows `%APPDATA%\Claude\claude_desktop_config.json`, on macOS `~/Library/Application Support/Claude/claude_desktop_config.json`.
+- [ ] In the app menu (not in the account settings inside the window), open Settings → Developer → Edit Config. A file manager window opens with the `claude_desktop_config.json` file highlighted.
+- [ ] Open `claude_desktop_config.json` in a text editor.
 - [ ] Add the server to the `mcpServers` section:
   ```json
   {
@@ -393,56 +403,65 @@ The server is ready and checked in Inspector. Now let's connect it to two client
     }
   }
   ```
+  and save the file.
 - [ ] Quit Claude Desktop completely, including the tray icon, and open it again.
 
 **Documentation:** [Connect to local MCP servers](https://modelcontextprotocol.io/docs/develop/connect-local-servers)
 
 **Explanations:**
+- The file is in the `%APPDATA%\Claude\` folder (on macOS `~/Library/Application Support/Claude/`). You will need it again in step 8.5 to remove the server.
 - This is the same command as in step 8.1, just split into `command` and `args`.
 - The path must be absolute. In JSON a backslash has to be doubled (`C:\\path\\to\\mcp_practice`), so forward slashes are simpler.
 - If the file already has other servers, add `notes` next to them instead of replacing the whole file.
 - Claude Desktop reads the config only at startup, so changes don't apply without a full restart.
 
-**Check:** "+" in the input line → Connectors → Manage connectors → `notes`: the server's tools are listed.
+- [ ] Click "+" in the input line → Connectors → Manage connectors → `notes`.
+
+**Expected result:** the server's tools `list_notes`, `read_note`, and `write_note` are listed.
 
 **If it doesn't connect:** check the logs in the `%APPDATA%\Claude\logs` folder (on macOS `~/Library/Logs/Claude`):
 - `mcp.log` — the general log of connections and their errors;
 - `mcp-server-notes.log` — everything the server writes to stderr, including your `logging` records from module 5.
 
-### Step 8.5 — Claude Desktop Chat: check
+**Hint:** after editing `server.py`, restart Claude Desktop completely again, including the tray icon.
 
-**Tools:**
-- [ ] Ask the same questions in the chat as in step 8.3: the list of notes, a nonexistent note, creating a note.
+### Step 8.4 — Claude Desktop Chat: check
 
-**What to observe:** Claude Desktop Chat also asks for permission before a tool call.
+#### Tools
 
-**Resources and prompts:**
+- [ ] Ask the same questions in the chat as in step 8.2: the list of notes, a nonexistent note, creating a note.
+
+**Expected result:** Claude answers the same way as in Claude Code, and also asks for permission before a tool call.
+
+#### Resources and prompts
+
 - [ ] Click "+" in the input line (or type `/`) → Connectors → scroll the list down → Add from notes. A menu opens: prompts are marked with a chat bubble icon, resources with a file icon.
 - [ ] Attach the Notes Index resource and ask a question about the notes.
 - [ ] Select the Summarize note prompt and enter a note name in the field that appears.
 - [ ] Invoke the second prompt from step 7.2 the same way.
 
-**What to observe:**
-- The `notes://{name}` template is not in the menu, just as in Claude Code.
-- Both prompts work, including the prompt with several messages.
+**Expected result:**
+- the `notes://{name}` template is not in the menu, just as in Claude Code;
+- Claude answers from the attached Notes Index;
+- both prompts work, including the prompt with several messages.
 
-**Hint:** after editing `server.py`, restart Claude Desktop completely again, including the tray icon.
+### Step 8.5 — Clean up after yourself
 
-### Step 8.6 — Clean up after yourself
+#### Claude Code
 
-**Claude Code:**
 - [ ] Run `claude mcp remove notes`. If the server is registered in several scopes, specify the one you need: `claude mcp remove notes --scope project`.
 - [ ] If you registered with `--scope project`, check that no `notes` entry is left in `.mcp.json`. An empty file can be deleted.
 
-**Check:** `claude mcp list` doesn't show `notes`.
+**Expected result:** `claude mcp list` doesn't show `notes`.
 
-**Claude Desktop:**
+#### Claude Desktop
+
 - [ ] Remove the `notes` entry from the `mcpServers` section of `claude_desktop_config.json`.
 - [ ] Restart Claude Desktop completely.
 
-**Check:** `notes` is no longer in Connectors.
+**Expected result:** `notes` is no longer in Connectors.
 
-### Step 8.7 — Final question
+### Step 8.6 — Final question
 - [ ] Answer the question below in your own words.
 
 **Comprehension question 6.** When to use what: **tool**, **resource**, **prompt**? ([answer](#answers-to-comprehension-questions))
