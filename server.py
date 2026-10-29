@@ -30,6 +30,7 @@ def list_notes() -> list[str]:
     Returns file names with the .md extension, sorted alphabetically,
     for example "shopping-list.md". Pass a name as-is to read_note.
     """
+    logger.info("Listing notes")
     return sorted(path.name for path in NOTES_DIR.glob("*.md"))
 
 

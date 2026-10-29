@@ -1,7 +1,7 @@
 [project]
 name = "mcp-practice"
 version = "0.1.0"
-description = "Add your description here"
+description = "Notes MCP server built step by step in the MCP practice course"
 readme = "README.md"
 authors = [
     { name = "Mykola Burdo", email = "72523519+nickburdo@users.noreply.github.com" }
