@@ -1,8 +1,8 @@
-# Workshop: Your Own MCP Server for Claude Code and Claude Desktop
+# Workshop: Your Own MCP Server for Claude Code and Claude Desktop Chat
 
-The goal is to write a minimal local "Notes" MCP server in Python with your own hands, check it in MCP Inspector, then connect it to Claude Code and Claude Desktop and see how Claude works with it.
+The goal is to write a minimal local "Notes" MCP server in Python with your own hands, check it in MCP Inspector, then connect it to Claude Code and Claude Desktop Chat and see how Claude works with it.
 
-- **No API keys and no custom client**: during development the server is checked in MCP Inspector, and in the last module Claude Code and Claude Desktop act as the clients.
+- **No API keys and no custom client**: during development the server is checked in MCP Inspector, and in the last module Claude Code and Claude Desktop Chat act as the clients.
 - **No hosting**: the server runs locally over stdio, and the client launches it as a subprocess itself.
 - **No ready-made solutions**: each step has a task, API hints, and a check criterion. You write the code.
 
@@ -107,7 +107,7 @@ Stop the process with `Ctrl+C`.
 **What to notice:**
 - `initialize` must come first: this is the handshake in which the client and the server agree on the protocol version.
 - The `id` field links each response to its request.
-- This is exactly the exchange that MCP Inspector and clients such as Claude Code and Claude Desktop perform for you. Repeat `tools/list` after module 2 and you will see `list_notes` with its description and argument schema.
+- This is exactly the exchange that MCP Inspector and clients such as Claude Code and Claude Desktop Chat perform for you. Repeat `tools/list` after module 2 and you will see `list_notes` with its description and argument schema.
 
 **Comprehension question 1.** Why is it pointless to keep such a server running in a separate terminal and expect a client, such as Claude Code, to connect to it? ([answer](#answers-to-comprehension-questions))
 
@@ -308,7 +308,7 @@ You will see how resources look in the clients in module 8.
 
 ## Module 8. Connecting to clients
 
-The server is ready and checked in Inspector. Now let's connect it to two clients, Claude Code and Claude Desktop, and see how the model works with it.
+The server is ready and checked in Inspector. Now let's connect it to two clients, Claude Code and Claude Desktop Chat, and see how the model works with it.
 
 ### Step 8.1 — Claude Code: registration
 - [ ] Make sure `claude --version` prints a version.
@@ -366,7 +366,7 @@ The server is ready and checked in Inspector. Now let's connect it to two client
 **Resources:**
 - [ ] Type `@` in the input line, find the resources of the `notes` server, and attach `notes://index` to a question.
 
-> **Resource templates in clients.** The `@` autocomplete contains only static resources, so you can't attach a note by the `notes://{name}` template. Claude Desktop doesn't show templates either, so in this course the template is checked only in Inspector. If you need to attach notes in a client, register each one as a separate resource: see the ["Notes in the resource list"](#notes-in-the-resource-list) section at the end of the course.
+> **Resource templates in clients.** The `@` autocomplete contains only static resources, so you can't attach a note by the `notes://{name}` template. Claude Desktop Chat doesn't show templates either, so in this course the template is checked only in Inspector. If you need to attach notes in a client, register each one as a separate resource: see the ["Notes in the resource list"](#notes-in-the-resource-list) section at the end of the course.
 
 **Comprehension question 4.** Which resources does a client offer for attaching: static, templated, or both? ([answer](#answers-to-comprehension-questions))
 
@@ -377,9 +377,10 @@ The server is ready and checked in Inspector. Now let's connect it to two client
 
 **Hint:** you can also type the same command in its full form: `/mcp__notes__summarize_note <note name>`.
 
-> **Prompts with several messages** don't work in Claude Code. Check the second prompt from step 7.2 in Claude Desktop.
+> **Prompts with several messages** don't work in Claude Code. Check the second prompt from step 7.2 in Claude Desktop Chat.
 
-### Step 8.4 — Claude Desktop: registration
+### Step 8.4 — Claude Desktop Chat: registration
+- [ ] Open Claude Desktop and switch to the chat tab: the tab switcher is at the top of the left sidebar, on the right. Select the chat mode (Chat) specifically, not Cowork. This matters: in other modes some of our server's features are unavailable.
 - [ ] In the app menu (not in the account settings inside the window), open Settings → Developer → Edit Config. This opens the `claude_desktop_config.json` file: on Windows `%APPDATA%\Claude\claude_desktop_config.json`, on macOS `~/Library/Application Support/Claude/claude_desktop_config.json`.
 - [ ] Add the server to the `mcpServers` section:
   ```json
@@ -408,12 +409,12 @@ The server is ready and checked in Inspector. Now let's connect it to two client
 - `mcp.log` — the general log of connections and their errors;
 - `mcp-server-notes.log` — everything the server writes to stderr, including your `logging` records from module 5.
 
-### Step 8.5 — Claude Desktop: check
+### Step 8.5 — Claude Desktop Chat: check
 
 **Tools:**
 - [ ] Ask the same questions in the chat as in step 8.3: the list of notes, a nonexistent note, creating a note.
 
-**What to observe:** Claude Desktop also asks for permission before a tool call.
+**What to observe:** Claude Desktop Chat also asks for permission before a tool call.
 
 **Resources and prompts:**
 - [ ] Click "+" in the input line (or type `/`) → Connectors → scroll the list down → Add from notes. A menu opens: prompts are marked with a chat bubble icon, resources with a file icon.
@@ -495,7 +496,7 @@ Inspector won't show this mistake: `mcp dev` imports the file rather than runnin
 
 ### Notes in the resource list
 
-Clients offer only resources from `resources/list` for attaching: Claude Code in the `@` autocomplete, Claude Desktop in the Add from notes menu. The `notes://{name}` template doesn't get there. To make notes attachable in a client, register each one as a separate resource. The SDK has a ready-made `FileResource` class for files:
+Clients offer only resources from `resources/list` for attaching: Claude Code in the `@` autocomplete, Claude Desktop Chat in the Add from notes menu. The `notes://{name}` template doesn't get there. To make notes attachable in a client, register each one as a separate resource. The SDK has a ready-made `FileResource` class for files:
 
 ```python
 from mcp.server.mcpserver.resources import FileResource
@@ -516,7 +517,7 @@ The list is built once, when the server starts. A note created later will appear
 **Without reconnecting.** The server can tell the client that the resource list has changed with a `notifications/resources/list_changed` notification. When Claude Code receives it, it requests the list again. For this, after creating a note in `write_note`, register the new resource and send the notification. Three caveats:
 - the way to send it depends on the protocol version: `ctx.notify_resources_changed()` works on the 2026-07-28 protocol, while older ones need `ctx.session.send_resource_list_changed()`;
 - in its `initialize` response, the server declares `"resources":{"listChanged":false}` by default, and the client is entitled to ignore notifications from such a server;
-- whether Claude Desktop supports such notifications has not been checked in this course.
+- whether Claude Desktop Chat supports such notifications has not been checked in this course.
 
 **Documentation:** [Resources](https://py.sdk.modelcontextprotocol.io/servers/resources/), [Subscriptions](https://py.sdk.modelcontextprotocol.io/handlers/subscriptions/)
 
@@ -550,7 +551,7 @@ The model is not a security boundary. It can make mistakes, and it can be tricke
 A mistake while reading can simply be ignored, but a mistake while writing cannot: an overwritten note can't be brought back. The model may misunderstand the request or follow someone else's instruction found in the data it has read. The permission request keeps a human as the last step before an irreversible action. The `readOnlyHint` and `destructiveHint` annotations help the host decide where asking is a must.
 
 **4. Which resources does a client offer for attaching?**
-Only static ones, such as `notes://index`. The server returns them in response to `resources/list`: these are concrete resources with a ready address. The `notes://{name}` template comes in a separate `resources/templates/list` request as an address pattern, not as a list of notes. Neither Claude Code nor Claude Desktop shows it, so you can't attach a note by the template. Inspector does work with templates: you can fill in a name there and read the resource.
+Only static ones, such as `notes://index`. The server returns them in response to `resources/list`: these are concrete resources with a ready address. The `notes://{name}` template comes in a separate `resources/templates/list` request as an address pattern, not as a list of notes. Neither Claude Code nor Claude Desktop Chat shows it, so you can't attach a note by the template. Inspector does work with templates: you can fill in a name there and read the resource.
 
 **5. How does an attached resource differ from a `list_notes` call?**
 - **Who decides.** You chose the resource; the model chose to call the tool.
