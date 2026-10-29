@@ -330,14 +330,7 @@ Read the documentation first: [Resources](https://py.sdk.modelcontextprotocol.io
 
 ## Module 9. Wrap-up
 
-### Step 9.1 — `project` scope
-- [ ] Remove the local registration and register the server with `--scope project`.
-
-**What to observe:**
-- A `.mcp.json` file appears in the project root. Study its format.
-- This file can be committed, and anyone who opens the project in Claude Code will get the server (after confirmation).
-
-### Step 9.2 — Final question
+### Step 9.1 — Final question
 - [ ] Answer the question below in your own words.
 
 **Comprehension question 6.** When to use what: **tool**, **resource**, **prompt**? ([answer](#answers-to-comprehension-questions))
@@ -345,9 +338,6 @@ Read the documentation first: [Resources](https://py.sdk.modelcontextprotocol.io
 ---
 
 ## What's next (beyond the course)
-- Streamable HTTP transport: the same server as a network service, and `claude mcp add --transport http`.
-- Structured tool output: returning Pydantic models and TypedDict.
-- Progress for long-running operations: `ctx.report_progress(...)`.
 - Tools in a separate file: details below.
 - Notes in the `@` autocomplete: details below.
 - Resource templates in more detail: details below.
