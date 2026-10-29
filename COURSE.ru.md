@@ -305,20 +305,22 @@ mcp_practice/
 
 ## Модуль 8. Промпты (prompts)
 
-### Шаг 8.1 — `summarize_note(name)`
-- [ ] Промпт возвращает текст запроса «кратко перескажи заметку …» вместе с содержимым заметки.
+### Шаг 8.1 — Промпт с одним сообщением
+- [ ] Добавить в `server.py` функцию `summarize_note(name)` с декоратором `@mcp.prompt()`. Функция читает заметку и возвращает строку: просьбу кратко пересказать заметку и текст этой заметки.
 
-**Подсказки:**
-- `@mcp.prompt()`. Возвращаемый `str` станет сообщением пользователя.
-- Аргументы функции становятся аргументами промпта.
+**Почему именно `summarize_note`:** имя функции становится именем промпта. В шаге 8.3 вы будете искать в Claude Code команду `/notes:summarize_note`, поэтому назовите функцию именно так.
 
-### Шаг 8.2 — Многосообщенческий промпт
+**Документация:** [Prompts](https://py.sdk.modelcontextprotocol.io/servers/prompts/)
+
+### Шаг 8.2 — Промпт с несколькими сообщениями
 - [ ] Сделать второй промпт, который возвращает несколько сообщений, например заготовку диалога «пользователь → ассистент».
 
-**Подсказки:** `from mcp.server.mcpserver.prompts.base import Message, UserMessage, AssistantMessage`. Тип возврата — `list[Message]`.
+**Документация:** [Prompts: More than one message](https://py.sdk.modelcontextprotocol.io/servers/prompts/#more-than-one-message)
 
 ### Шаг 8.3 — Проверка в Claude Code
 - [ ] Набрать `/` и найти в списке команду `/notes:summarize_note (MCP)`. Вызвать её с именем заметки.
+
+**Документация:** [Claude Code: MCP](https://code.claude.com/docs/en/mcp)
 
 **Подсказка:** ту же команду можно ввести и в полной форме: `/mcp__notes__summarize_note <имя заметки>`.
 
